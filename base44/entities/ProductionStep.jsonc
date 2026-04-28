@@ -1,0 +1,39 @@
+{
+  "name": "ProductionStep",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string",
+      "description": "Gekoppeld product ID"
+    },
+    "title": {
+      "type": "string",
+      "description": "Titel van de stap"
+    },
+    "description": {
+      "type": "string",
+      "description": "Uitleg en verduidelijking bij de stap"
+    },
+    "video_url": {
+      "type": "string",
+      "description": "URL van de instructievideo"
+    },
+    "step_number": {
+      "type": "number",
+      "description": "Stapnummer / volgorde"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "description": "Geschatte duur in seconden"
+    },
+    "tips": {
+      "type": "string",
+      "description": "Extra tips of waarschuwingen"
+    }
+  },
+  "required": [
+    "product_id",
+    "title",
+    "step_number"
+  ]
+}

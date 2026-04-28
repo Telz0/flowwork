@@ -1,0 +1,112 @@
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus, Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
+
+export default function CategoriesBeheer() {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState({ name: '', description: '', icon: '📦', order: 0 });
+  const [editing, setEditing] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const { data: categories = [], isLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => base44.entities.Category.list('order', 50),
+  });
+
+  const save = async () => {
+    setSaving(true);
+    if (editing) {
+      await base44.entities.Category.update(editing, form);
+    } else {
+      await base44.entities.Category.create(form);
+    }
+    await queryClient.invalidateQueries({ queryKey: ['categories'] });
+    setForm({ name: '', description: '', icon: '📦', order: 0 });
+    setEditing(null);
+    setSaving(false);
+  };
+
+  const startEdit = (cat) => {
+    setEditing(cat.id);
+    setForm({ name: cat.name, description: cat.description || '', icon: cat.icon || '📦', order: cat.order || 0 });
+  };
+
+  const remove = async (id) => {
+    if (!confirm('Categorie verwijderen?')) return;
+    await base44.entities.Category.delete(id);
+    queryClient.invalidateQueries({ queryKey: ['categories'] });
+  };
+
+  const cancel = () => {
+    setEditing(null);
+    setForm({ name: '', description: '', icon: '📦', order: 0 });
+  };
+
+  return (
+    <div className="grid lg:grid-cols-2 gap-8">
+      {/* Form */}
+      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+        <h2 className="font-bold text-lg mb-5">{editing ? 'Categorie bewerken' : 'Nieuwe categorie'}</h2>
+        <div className="space-y-4">
+          <div className="grid grid-cols-4 gap-3">
+            <div>
+              <Label className="text-xs mb-1 block">Icoon</Label>
+              <Input value={form.icon} onChange={e => setForm(f => ({ ...f, icon: e.target.value }))} className="text-center text-xl" maxLength={2} />
+            </div>
+            <div className="col-span-3">
+              <Label className="text-xs mb-1 block">Naam *</Label>
+              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Categorienaam" />
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs mb-1 block">Omschrijving</Label>
+            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Korte omschrijving..." rows={2} />
+          </div>
+          <div>
+            <Label className="text-xs mb-1 block">Volgorde</Label>
+            <Input type="number" value={form.order} onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))} />
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={save} disabled={!form.name || saving} className="flex-1">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
+              {editing ? 'Opslaan' : 'Aanmaken'}
+            </Button>
+            {editing && (
+              <Button variant="outline" onClick={cancel}><X className="w-4 h-4" /></Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* List */}
+      <div className="space-y-3">
+        {isLoading ? (
+          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+        ) : categories.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center py-8">Nog geen categorieën.</p>
+        ) : (
+          categories.map(cat => (
+            <div key={cat.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-xl flex-shrink-0">{cat.icon || '📦'}</span>
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{cat.name}</p>
+                  {cat.description && <p className="text-xs text-muted-foreground truncate">{cat.description}</p>}
+                </div>
+              </div>
+              <div className="flex gap-1 flex-shrink-0">
+                <Button variant="ghost" size="icon" onClick={() => startEdit(cat)}><Pencil className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" onClick={() => remove(cat.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

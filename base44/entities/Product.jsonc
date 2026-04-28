@@ -1,0 +1,35 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Productnaam"
+    },
+    "category_id": {
+      "type": "string",
+      "description": "Gekoppelde categorie ID"
+    },
+    "description": {
+      "type": "string",
+      "description": "Korte omschrijving van het product"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Afbeelding URL van het product"
+    },
+    "order": {
+      "type": "number",
+      "description": "Volgorde binnen de categorie"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Actief/inactief"
+    }
+  },
+  "required": [
+    "name",
+    "category_id"
+  ]
+}
