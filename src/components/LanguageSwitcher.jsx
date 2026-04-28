@@ -6,7 +6,7 @@ export default function LanguageSwitcher() {
   const { language, changeLanguage } = useLanguage();
 
   const languages = [
-    { code: 'nl', name: '🇳🇱 Nederlands' },
+    { code: 'nl', name: '🇧🇪 Nederlands' },
     { code: 'fr', name: '🇫🇷 Français' },
     { code: 'en', name: '🇬🇧 English' },
   ];
