@@ -29,6 +29,17 @@
     "tips": {
       "type": "string",
       "description": "Extra tips of waarschuwingen"
+    },
+    "qc_photo_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "QC controle foto's voor deze stap"
+    },
+    "qc_label": {
+      "type": "string",
+      "description": "Label / omschrijving bij de QC controle foto's"
     }
   },
   "required": [

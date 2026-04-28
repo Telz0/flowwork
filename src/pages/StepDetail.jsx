@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { ChevronLeft, ChevronRight, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX, Film } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import QcFotoGalerij from '@/components/QcFotoGalerij';
 
 export default function StepDetail() {
   const { productId, stepId } = useParams();
@@ -165,6 +166,9 @@ export default function StepDetail() {
             <p className="text-foreground leading-relaxed">{step.description}</p>
           </div>
         )}
+
+        {/* QC Foto's */}
+        <QcFotoGalerij photos={step.qc_photo_urls} label={step.qc_label} />
 
         {/* Tips */}
         {step.tips && (
