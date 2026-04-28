@@ -50,11 +50,11 @@ export default function CategoriesBeheer() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-8">
+    <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
       {/* Form */}
-      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-        <h2 className="font-bold text-lg mb-5">{editing ? (language === 'nl' ? 'Categorie bewerken' : language === 'fr' ? 'Modifier la catégorie' : 'Edit category') : (language === 'nl' ? 'Nieuwe categorie' : language === 'fr' ? 'Nouvelle catégorie' : 'New category')}</h2>
-        <div className="space-y-4">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm order-last lg:order-first">
+        <h2 className="font-bold text-base sm:text-lg mb-4">{editing ? (language === 'nl' ? 'Categorie bewerken' : language === 'fr' ? 'Modifier la catégorie' : 'Edit category') : (language === 'nl' ? 'Nieuwe categorie' : language === 'fr' ? 'Nouvelle catégorie' : 'New category')}</h2>
+        <div className="space-y-3">
           <div className="grid grid-cols-4 gap-3">
             <div>
               <Label className="text-xs mb-1 block">{language === 'nl' ? 'Icoon' : language === 'fr' ? 'Icône' : 'Icon'}</Label>
@@ -86,7 +86,7 @@ export default function CategoriesBeheer() {
       </div>
 
       {/* List */}
-      <div className="space-y-3">
+      <div className="space-y-2 order-first lg:order-last">
         {isLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : categories.length === 0 ? (

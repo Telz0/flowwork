@@ -108,13 +108,13 @@ export default function StappenBeheer({ isAdmin }) {
     : products;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* SharePoint verbinding status */}
       <SharePointVerbinding />
 
       {/* Category + Product selector */}
-      <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
-        <div className="flex flex-col sm:flex-row gap-4">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:gap-4">
           <div className="flex-1">
             <Label className="text-sm font-semibold mb-2 block">{language === 'nl' ? '1. Kies een categorie' : language === 'fr' ? '1. Choisir une catégorie' : '1. Choose category'}</Label>
             <Select value={selectedCategory} onValueChange={handleCategorySelect}>
@@ -141,19 +141,19 @@ export default function StappenBeheer({ isAdmin }) {
       </div>
 
       {selectedProduct && (
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Steps list - shown first on mobile/tablet, second on desktop */}
-          <div className="space-y-3 order-first lg:order-last">
+        <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+           {/* Steps list - shown first on mobile/tablet, second on desktop */}
+          <div className="space-y-2 order-first lg:order-last">
             {loadingSteps ? (
               <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : steps.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-2">
-                <Film className="w-10 h-10 opacity-30" />
-                <p className="text-sm">{language === 'nl' ? 'Nog geen stappen. Voeg de eerste stap toe.' : language === 'fr' ? 'Pas encore d\'étapes. Ajoutez la première étape.' : 'No steps yet. Add the first step.'}</p>
+              <div className="text-center py-12 sm:py-16 text-muted-foreground flex flex-col items-center gap-2">
+                <Film className="w-8 sm:w-10 h-8 sm:h-10 opacity-30" />
+                <p className="text-xs sm:text-sm">{language === 'nl' ? 'Nog geen stappen. Voeg de eerste stap toe.' : language === 'fr' ? 'Pas encore d\'étapes. Ajoutez la première étape.' : 'No steps yet. Add the first step.'}</p>
               </div>
             ) : (
               steps.map((s, idx) => (
-                <div key={s.id} className="bg-card border border-border rounded-xl p-4 shadow-sm">
+                <div key={s.id} className="bg-card border border-border rounded-xl p-3 sm:p-4 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-xs font-bold flex-shrink-0">
@@ -180,9 +180,9 @@ export default function StappenBeheer({ isAdmin }) {
           </div>
 
           {/* Form */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm order-last lg:order-first">
-            <h2 className="font-bold text-lg mb-5">{editing ? (language === 'nl' ? 'Stap bewerken' : language === 'fr' ? 'Modifier l\'étape' : 'Edit step') : (language === 'nl' ? 'Nieuwe stap' : language === 'fr' ? 'Nouvelle étape' : 'New step')}</h2>
-            <div className="space-y-4">
+          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm order-last lg:order-first">
+           <h2 className="font-bold text-base sm:text-lg mb-4">{editing ? (language === 'nl' ? 'Stap bewerken' : language === 'fr' ? 'Modifier l\'étape' : 'Edit step') : (language === 'nl' ? 'Nieuwe stap' : language === 'fr' ? 'Nouvelle étape' : 'New step')}</h2>
+           <div className="space-y-3">
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs mb-1 block">{language === 'nl' ? 'Volgorde index' : language === 'fr' ? 'Index d\'ordre' : 'Order index'}</Label>

@@ -79,12 +79,12 @@ export default function ProductenBeheer({ isAdmin }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Category filter */}
-      <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-sm">
         <Label className="text-sm font-semibold mb-2 block">{language === 'nl' ? 'Filter op categorie' : language === 'fr' ? 'Filtrer par catégorie' : 'Filter by category'}</Label>
         <Select value={filterCategory} onValueChange={handleFilterCategory}>
-          <SelectTrigger className="max-w-sm">
+          <SelectTrigger className="w-full">
             <SelectValue placeholder={language === 'nl' ? 'Alle categorieën' : language === 'fr' ? 'Toutes les catégories' : 'All categories'} />
           </SelectTrigger>
           <SelectContent>
@@ -94,10 +94,10 @@ export default function ProductenBeheer({ isAdmin }) {
         </Select>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-8">
-      <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-        <h2 className="font-bold text-lg mb-5">{editing ? (language === 'nl' ? 'Product bewerken' : language === 'fr' ? 'Modifier le produit' : 'Edit product') : (language === 'nl' ? 'Nieuw product' : language === 'fr' ? 'Nouveau produit' : 'New product')}</h2>
-        <div className="space-y-4">
+      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm order-last lg:order-first">
+        <h2 className="font-bold text-base sm:text-lg mb-4">{editing ? (language === 'nl' ? 'Product bewerken' : language === 'fr' ? 'Modifier le produit' : 'Edit product') : (language === 'nl' ? 'Nieuw product' : language === 'fr' ? 'Nouveau produit' : 'New product')}</h2>
+        <div className="space-y-3">
           <div>
             <Label className="text-xs mb-1 block">{language === 'nl' ? 'Naam *' : language === 'fr' ? 'Nom *' : 'Name *'}</Label>
             <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={language === 'nl' ? 'Productnaam' : language === 'fr' ? 'Nom du produit' : 'Product name'} />
@@ -140,24 +140,24 @@ export default function ProductenBeheer({ isAdmin }) {
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2 order-first lg:order-last">
         {isLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : filteredProducts.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-8">{language === 'nl' ? 'Geen producten gevonden.' : language === 'fr' ? 'Aucun produit trouvé.' : 'No products found.'}</p>
+          <p className="text-muted-foreground text-xs sm:text-sm text-center py-8">{language === 'nl' ? 'Geen producten gevonden.' : language === 'fr' ? 'Aucun produit trouvé.' : 'No products found.'}</p>
         ) : (
           filteredProducts.map(p => (
-            <div key={p.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-3 shadow-sm">
-              <div className="flex items-center gap-3 min-w-0">
-                {p.image_url && <img src={p.image_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />}
+            <div key={p.id} className="bg-card border border-border rounded-xl p-3 sm:p-4 flex items-center justify-between gap-2 sm:gap-3 shadow-sm">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                {p.image_url && <img src={p.image_url} alt="" className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg object-cover flex-shrink-0" />}
                 <div className="min-w-0">
-                  <p className="font-semibold truncate">{p.name}</p>
+                  <p className="font-semibold text-sm truncate">{p.name}</p>
                   <p className="text-xs text-muted-foreground">{catName(p.category_id)}</p>
                 </div>
               </div>
-              <div className="flex gap-1 flex-shrink-0">
-                <Button variant="ghost" size="icon" onClick={() => startEdit(p)}><Pencil className="w-4 h-4" /></Button>
-                {isAdmin && <Button variant="ghost" size="icon" onClick={() => remove(p.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>}
+              <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(p)}><Pencil className="w-3 h-3" /></Button>
+                {isAdmin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => remove(p.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-3 h-3" /></Button>}
               </div>
             </div>
           ))
