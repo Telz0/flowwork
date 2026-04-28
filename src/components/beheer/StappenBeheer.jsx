@@ -55,14 +55,19 @@ export default function StappenBeheer({ isAdmin }) {
 
   const save = async () => {
     setSaving(true);
-    const data = { ...form, product_id: form.product_id || selectedProduct, order_index: parseInt(form.order_index) || 100, duration_seconds: form.duration_seconds ? parseInt(form.duration_seconds) : null };
+    const savedOrderIndex = parseInt(form.order_index) || 100;
+    const data = { ...form, product_id: form.product_id || selectedProduct, order_index: savedOrderIndex, duration_seconds: form.duration_seconds ? parseInt(form.duration_seconds) : null };
     if (editing) {
       await base44.entities.ProductionStep.update(editing, data);
     } else {
       await base44.entities.ProductionStep.create(data);
     }
     await queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
-    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', order_index: nextOrderIndex, duration_seconds: '', tips: '', qc_items: [] });
+    // Bereken volgende index: hoogste van bestaande stappen + opgeslagen index, afgerond op 100tal
+    const allIndices = steps.map(s => s.order_index || 0).concat([savedOrderIndex]);
+    const maxIndex = Math.max(...allIndices);
+    const nextIndex = Math.ceil((maxIndex + 1) / 100) * 100;
+    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', order_index: nextIndex, duration_seconds: '', tips: '', qc_items: [] });
     setEditing(null);
     setSaving(false);
   };
