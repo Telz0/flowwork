@@ -366,8 +366,8 @@ export default function ProductDetail() {
             <X className="w-5 h-5" />
           </button>
           <img src={lightboxItem.photo_url} alt={lightboxItem.label} className="max-w-full max-h-[80vh] rounded-xl object-contain" onClick={e => e.stopPropagation()} />
-          {lightboxItem.label && <p className="text-white/80 text-sm mt-3 font-medium">{lightboxItem.label}</p>}
-          {lightboxItem.stepTitle && <p className="text-white/50 text-xs mt-1">Stap: {lightboxItem.stepTitle}</p>}
+          {lightboxItem.label && <p className="text-white/80 text-sm mt-3 font-medium">{getTranslated(lightboxItem, 'label', language)}</p>}
+          {lightboxItem.stepTitle && <p className="text-white/50 text-xs mt-1">{language === 'nl' ? 'Stap' : language === 'fr' ? 'Étape' : 'Step'}: {lightboxItem.stepTitle}</p>}
         </div>
       )}
     </div>
