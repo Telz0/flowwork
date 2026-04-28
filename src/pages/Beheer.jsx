@@ -24,7 +24,7 @@ export default function Beheer() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
+    <div className="mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-4xl sm:max-w-6xl lg:max-w-7xl">
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">{language === 'nl' ? 'Beheer' : language === 'fr' ? 'Gestion' : 'Management'}</h1>
         <p className="text-sm sm:text-base text-muted-foreground mt-1">{language === 'nl' ? 'Beheer categorieën, producten en instructievideo\'s.' : language === 'fr' ? 'Gérez les catégories, les produits et les vidéos d\'instruction.' : 'Manage categories, products and instruction videos.'}</p>
