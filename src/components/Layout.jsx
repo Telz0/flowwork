@@ -1,6 +1,7 @@
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Film, LayoutGrid, Settings, LogOut, ChevronRight } from 'lucide-react';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -46,6 +47,9 @@ export default function Layout() {
                 </Link>
               );
             })}
+            <div className="ml-2 pl-2 border-l border-border">
+              <LanguageSwitcher />
+            </div>
             <button
               onClick={() => logout()}
               className="ml-2 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
