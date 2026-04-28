@@ -52,25 +52,25 @@ export default function CategoriesBeheer() {
   return (
     <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
       {/* Form */}
-      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm order-last lg:order-first">
-        <h2 className="font-bold text-base sm:text-lg mb-4">{editing ? (language === 'nl' ? 'Categorie bewerken' : language === 'fr' ? 'Modifier la catégorie' : 'Edit category') : (language === 'nl' ? 'Nieuwe categorie' : language === 'fr' ? 'Nouvelle catégorie' : 'New category')}</h2>
-        <div className="space-y-3">
-          <div className="grid grid-cols-4 gap-3">
-            <div>
-              <Label className="text-xs mb-1 block">{language === 'nl' ? 'Icoon' : language === 'fr' ? 'Icône' : 'Icon'}</Label>
+      <div className="bg-card border border-border rounded-2xl p-3 sm:p-6 shadow-sm order-last lg:order-first">
+        <h2 className="font-bold text-sm sm:text-lg mb-3">{editing ? (language === 'nl' ? 'Categorie bewerken' : language === 'fr' ? 'Modifier la catégorie' : 'Edit category') : (language === 'nl' ? 'Nieuwe categorie' : language === 'fr' ? 'Nouvelle catégorie' : 'New category')}</h2>
+        <div className="space-y-2">
+          <div className="grid grid-cols-4 gap-2">
+             <div>
+               <Label className="text-xs mb-0.5 block">{language === 'nl' ? 'Icoon' : language === 'fr' ? 'Icône' : 'Icon'}</Label>
               <Input value={form.icon} onChange={e => setForm(f => ({ ...f, icon: e.target.value }))} className="text-center text-xl" maxLength={2} />
             </div>
             <div className="col-span-3">
-              <Label className="text-xs mb-1 block">{language === 'nl' ? 'Naam *' : language === 'fr' ? 'Nom *' : 'Name *'}</Label>
+              <Label className="text-xs mb-0.5 block">{language === 'nl' ? 'Naam *' : language === 'fr' ? 'Nom *' : 'Name *'}</Label>
               <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={language === 'nl' ? 'Categorienaam' : language === 'fr' ? 'Nom de la catégorie' : 'Category name'} />
             </div>
           </div>
           <div>
-            <Label className="text-xs mb-1 block">{language === 'nl' ? 'Omschrijving' : language === 'fr' ? 'Description' : 'Description'}</Label>
-            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} rows={2} />
+            <Label className="text-xs mb-0.5 block">{language === 'nl' ? 'Omschrijving' : language === 'fr' ? 'Description' : 'Description'}</Label>
+            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} rows={1} />
           </div>
           <div>
-            <Label className="text-xs mb-1 block">{language === 'nl' ? 'Volgorde' : language === 'fr' ? 'Ordre' : 'Order'}</Label>
+            <Label className="text-xs mb-0.5 block">{language === 'nl' ? 'Volgorde' : language === 'fr' ? 'Ordre' : 'Order'}</Label>
             <Input type="number" value={form.order} onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))} />
           </div>
           <div className="flex gap-2">
