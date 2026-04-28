@@ -22,7 +22,7 @@ export default function CategoryCard({ category, productCount, onClick }) {
       whileHover={{ scale: 1.02, y: -2 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`w-full text-left p-5 rounded-2xl border-2 ${c.bg} ${c.border} transition-all duration-200 shadow-sm hover:shadow-md group`}
+      className={`w-full text-left p-5 rounded-2xl border-2 ${c.bg} ${c.border} transition-all duration-200 shadow-sm hover:shadow-md group min-h-40`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
