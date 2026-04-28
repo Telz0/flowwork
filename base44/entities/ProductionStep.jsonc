@@ -30,16 +30,31 @@
       "type": "string",
       "description": "Extra tips of waarschuwingen"
     },
+    "qc_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "photo_url": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "QC controlepunten, elk met een titel en optionele foto"
+    },
     "qc_photo_urls": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "QC controle foto's voor deze stap"
+      "description": "Legacy: QC controle foto's (oud formaat)"
     },
     "qc_label": {
       "type": "string",
-      "description": "Label / omschrijving bij de QC controle foto's"
+      "description": "Legacy: Label bij QC foto's (oud formaat)"
     }
   },
   "required": [

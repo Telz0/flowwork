@@ -1,39 +1,73 @@
 import { useState } from 'react';
-import { Camera, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Camera, X, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 
-export default function QcFotoGalerij({ photos = [], label }) {
-  const [lightbox, setLightbox] = useState(null); // index of open photo
+export default function QcFotoGalerij({ qcItems = [], photos = [], label }) {
+  const [lightbox, setLightbox] = useState(null); // { url, title }
+  const [lightboxList, setLightboxList] = useState([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  if (!photos || photos.length === 0) return null;
+  // Support new qcItems format AND legacy photos/label format
+  const hasNewItems = qcItems && qcItems.length > 0;
+  const hasLegacy = !hasNewItems && photos && photos.length > 0;
 
-  const prev = () => setLightbox(i => (i > 0 ? i - 1 : photos.length - 1));
-  const next = () => setLightbox(i => (i < photos.length - 1 ? i + 1 : 0));
+  if (!hasNewItems && !hasLegacy) return null;
+
+  const openLightbox = (list, index) => {
+    setLightboxList(list);
+    setLightboxIndex(index);
+    setLightbox(true);
+  };
+
+  const prev = () => setLightboxIndex(i => (i > 0 ? i - 1 : lightboxList.length - 1));
+  const next = () => setLightboxIndex(i => (i < lightboxList.length - 1 ? i + 1 : 0));
 
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <Camera className="w-4 h-4 text-primary" />
-        <h3 className="font-semibold text-sm text-foreground">
-          {label || 'QC Controle foto\'s'}
-        </h3>
-        <span className="text-xs text-muted-foreground">({photos.length})</span>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {photos.map((url, i) => (
-          <button
-            key={i}
-            onClick={() => setLightbox(i)}
-            className="aspect-square rounded-xl overflow-hidden border border-border bg-muted hover:opacity-90 transition-opacity active:scale-95"
-          >
-            <img src={url} alt={`QC foto ${i + 1}`} className="w-full h-full object-cover" />
-          </button>
-        ))}
+        <h3 className="font-semibold text-sm text-foreground">QC Controlepunten</h3>
       </div>
 
+      {hasNewItems ? (
+        <div className="space-y-2">
+          {qcItems.map((item, i) => (
+            <div key={i} className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
+              <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+              <span className="text-sm text-green-900 flex-1 font-medium">{item.label || `Punt ${i + 1}`}</span>
+              {item.photo_url && (
+                <button
+                  onClick={() => {
+                    const urls = qcItems.filter(q => q.photo_url).map(q => ({ url: q.photo_url, title: q.label }));
+                    const idx = urls.findIndex(u => u.url === item.photo_url);
+                    openLightbox(urls, idx >= 0 ? idx : 0);
+                  }}
+                  className="w-12 h-12 rounded-lg overflow-hidden border border-green-300 flex-shrink-0 hover:opacity-80 transition-opacity active:scale-95"
+                >
+                  <img src={item.photo_url} alt={item.label} className="w-full h-full object-cover" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        // Legacy: grid of photos
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {photos.map((url, i) => (
+            <button
+              key={i}
+              onClick={() => openLightbox(photos.map(u => ({ url: u, title: label })), i)}
+              className="aspect-square rounded-xl overflow-hidden border border-border bg-muted hover:opacity-90 transition-opacity active:scale-95"
+            >
+              <img src={url} alt={`QC foto ${i + 1}`} className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Lightbox */}
-      {lightbox !== null && (
+      {lightbox && lightboxList.length > 0 && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4"
           onClick={() => setLightbox(null)}
         >
           <button
@@ -42,7 +76,8 @@ export default function QcFotoGalerij({ photos = [], label }) {
           >
             <X className="w-5 h-5" />
           </button>
-          {photos.length > 1 && (
+
+          {lightboxList.length > 1 && (
             <>
               <button
                 className="absolute left-4 w-10 h-10 text-white bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20"
@@ -58,13 +93,19 @@ export default function QcFotoGalerij({ photos = [], label }) {
               </button>
             </>
           )}
+
           <img
-            src={photos[lightbox]}
-            alt={`QC foto ${lightbox + 1}`}
-            className="max-w-full max-h-full rounded-xl object-contain"
+            src={lightboxList[lightboxIndex]?.url}
+            alt={lightboxList[lightboxIndex]?.title}
+            className="max-w-full max-h-[80vh] rounded-xl object-contain"
             onClick={e => e.stopPropagation()}
           />
-          <p className="absolute bottom-4 text-white/60 text-sm">{lightbox + 1} / {photos.length}</p>
+          {lightboxList[lightboxIndex]?.title && (
+            <p className="text-white/80 text-sm mt-3 font-medium">{lightboxList[lightboxIndex].title}</p>
+          )}
+          {lightboxList.length > 1 && (
+            <p className="text-white/50 text-xs mt-1">{lightboxIndex + 1} / {lightboxList.length}</p>
+          )}
         </div>
       )}
     </div>

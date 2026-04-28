@@ -14,7 +14,7 @@ export default function StappenBeheer({ isAdmin }) {
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
-  const [form, setForm] = useState({ product_id: '', title: '', description: '', video_url: '', step_number: 1, duration_seconds: '', tips: '', qc_photo_urls: [], qc_label: '' });
+  const [form, setForm] = useState({ product_id: '', title: '', description: '', video_url: '', step_number: 1, duration_seconds: '', tips: '', qc_items: [] });
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -62,14 +62,14 @@ export default function StappenBeheer({ isAdmin }) {
       await base44.entities.ProductionStep.create(data);
     }
     await queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
-    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: nextStepNumber + 1, duration_seconds: '', tips: '', qc_photo_urls: [], qc_label: '' });
+    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: nextStepNumber + 1, duration_seconds: '', tips: '', qc_items: [] });
     setEditing(null);
     setSaving(false);
   };
 
   const startEdit = (s) => {
     setEditing(s.id);
-    setForm({ product_id: s.product_id, title: s.title, description: s.description || '', video_url: s.video_url || '', step_number: s.step_number, duration_seconds: s.duration_seconds || '', tips: s.tips || '', qc_photo_urls: s.qc_photo_urls || [], qc_label: s.qc_label || '' });
+    setForm({ product_id: s.product_id, title: s.title, description: s.description || '', video_url: s.video_url || '', step_number: s.step_number, duration_seconds: s.duration_seconds || '', tips: s.tips || '', qc_items: s.qc_items || [] });
   };
 
   const remove = async (id) => {
@@ -80,7 +80,7 @@ export default function StappenBeheer({ isAdmin }) {
 
   const cancel = () => {
     setEditing(null);
-    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: nextStepNumber, duration_seconds: '', tips: '', qc_photo_urls: [], qc_label: '' });
+    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: nextStepNumber, duration_seconds: '', tips: '', qc_items: [] });
   };
 
   const handleCategorySelect = (val) => {
@@ -218,9 +218,8 @@ export default function StappenBeheer({ isAdmin }) {
                 <Textarea value={form.tips} onChange={e => setForm(f => ({ ...f, tips: e.target.value }))} rows={2} placeholder="Veiligheidstips, aandachtspunten..." />
               </div>
               <QcFotoUpload
-                photos={form.qc_photo_urls}
-                label={form.qc_label}
-                onChange={({ photos, label }) => setForm(f => ({ ...f, qc_photo_urls: photos, qc_label: label }))}
+                qcItems={form.qc_items}
+                onChange={(items) => setForm(f => ({ ...f, qc_items: items }))}
               />
               <div className="flex gap-2">
                 <Button onClick={save} disabled={!form.title || saving} className="flex-1">

@@ -103,7 +103,7 @@ function StepPlayer({ step }) {
       )}
 
       {/* QC Foto's */}
-      <QcFotoGalerij photos={step.qc_photo_urls} label={step.qc_label} />
+      <QcFotoGalerij qcItems={step.qc_items} photos={step.qc_photo_urls} label={step.qc_label} />
 
       {/* Tips */}
       {step.tips && (
