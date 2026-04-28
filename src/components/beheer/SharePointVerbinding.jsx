@@ -26,15 +26,31 @@ export default function SharePointVerbinding({ folder, onFolderChange }) {
 
   const handleConnect = async () => {
     setConnecting(true);
-    const url = await base44.connectors.connectAppUser(CONNECTOR_ID);
-    const popup = window.open(url, '_blank');
-    const timer = setInterval(() => {
-      if (!popup || popup.closed) {
-        clearInterval(timer);
+    try {
+      const url = await base44.connectors.connectAppUser(CONNECTOR_ID);
+      console.log('SharePoint OAuth URL:', url);
+      if (!url) {
+        console.error('Geen OAuth URL ontvangen');
         setConnecting(false);
-        checkConnection();
+        return;
       }
-    }, 500);
+      const popup = window.open(url, '_blank', 'width=600,height=700');
+      if (!popup) {
+        // Popup geblokkeerd - open in hetzelfde tabblad
+        window.location.href = url;
+        return;
+      }
+      const timer = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(timer);
+          setConnecting(false);
+          checkConnection();
+        }
+      }, 500);
+    } catch (err) {
+      console.error('Connect fout:', err);
+      setConnecting(false);
+    }
   };
 
   const handleDisconnect = async () => {
