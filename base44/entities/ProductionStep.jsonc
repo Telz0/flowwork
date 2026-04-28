@@ -8,11 +8,35 @@
     },
     "title": {
       "type": "string",
-      "description": "Titel van de stap"
+      "description": "Titel van de stap (Dutch - deprecated, use title_nl)"
+    },
+    "title_nl": {
+      "type": "string",
+      "description": "Titel van de stap in het Nederlands"
+    },
+    "title_fr": {
+      "type": "string",
+      "description": "Titre de l'\u00e9tape en fran\u00e7ais"
+    },
+    "title_en": {
+      "type": "string",
+      "description": "Step title in English"
     },
     "description": {
       "type": "string",
-      "description": "Uitleg en verduidelijking bij de stap"
+      "description": "Uitleg en verduidelijking bij de stap (Dutch - deprecated, use description_nl)"
+    },
+    "description_nl": {
+      "type": "string",
+      "description": "Uitleg in het Nederlands"
+    },
+    "description_fr": {
+      "type": "string",
+      "description": "Explication en fran\u00e7ais"
+    },
+    "description_en": {
+      "type": "string",
+      "description": "Explanation in English"
     },
     "video_url": {
       "type": "string",
@@ -32,7 +56,19 @@
     },
     "tips": {
       "type": "string",
-      "description": "Extra tips of waarschuwingen"
+      "description": "Extra tips of waarschuwingen (Dutch - deprecated, use tips_nl)"
+    },
+    "tips_nl": {
+      "type": "string",
+      "description": "Tips in het Nederlands"
+    },
+    "tips_fr": {
+      "type": "string",
+      "description": "Conseils en fran\u00e7ais"
+    },
+    "tips_en": {
+      "type": "string",
+      "description": "Tips in English"
     },
     "qc_items": {
       "type": "array",
@@ -40,6 +76,15 @@
         "type": "object",
         "properties": {
           "label": {
+            "type": "string"
+          },
+          "label_nl": {
+            "type": "string"
+          },
+          "label_fr": {
+            "type": "string"
+          },
+          "label_en": {
             "type": "string"
           },
           "photo_url": {
@@ -63,7 +108,7 @@
   },
   "required": [
     "product_id",
-    "title",
+    "title_nl",
     "order_index"
   ]
 }

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Camera, X, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { getTranslated } from '@/lib/getTranslated';
 
-export default function QcFotoGalerij({ qcItems = [], photos = [], label }) {
+export default function QcFotoGalerij({ qcItems = [], photos = [], label, language = 'nl' }) {
   const [lightbox, setLightbox] = useState(null); // { url, title }
   const [lightboxList, setLightboxList] = useState([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -25,7 +26,9 @@ export default function QcFotoGalerij({ qcItems = [], photos = [], label }) {
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <Camera className="w-4 h-4 text-primary" />
-        <h3 className="font-semibold text-sm text-foreground">QC Controlepunten</h3>
+        <h3 className="font-semibold text-sm text-foreground">
+          {language === 'nl' ? 'QC Controlepunten' : language === 'fr' ? 'Points de contrôle QC' : 'QC Control Points'}
+        </h3>
       </div>
 
       {hasNewItems ? (
@@ -33,7 +36,7 @@ export default function QcFotoGalerij({ qcItems = [], photos = [], label }) {
           {qcItems.map((item, i) => (
             <div key={i} className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
               <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-              <span className="text-sm text-green-900 flex-1 font-medium">{item.label || `Punt ${i + 1}`}</span>
+              <span className="text-sm text-green-900 flex-1 font-medium">{getTranslated(item, 'label', language) || (language === 'nl' ? `Punt ${i + 1}` : language === 'fr' ? `Point ${i + 1}` : `Point ${i + 1}`)}</span>
               {item.photo_url && (
                 <button
                   onClick={() => {
@@ -58,7 +61,7 @@ export default function QcFotoGalerij({ qcItems = [], photos = [], label }) {
               onClick={() => openLightbox(photos.map(u => ({ url: u, title: label })), i)}
               className="aspect-square rounded-xl overflow-hidden border border-border bg-muted hover:opacity-90 transition-opacity active:scale-95"
             >
-              <img src={url} alt={`QC foto ${i + 1}`} className="w-full h-full object-cover" />
+              <img src={url} alt={language === 'nl' ? `QC foto ${i + 1}` : language === 'fr' ? `Photo QC ${i + 1}` : `QC photo ${i + 1}`} className="w-full h-full object-cover" />
             </button>
           ))}
         </div>

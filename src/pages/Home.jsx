@@ -7,7 +7,7 @@ import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/LanguageContext';
-import { t } from '@/lib/translations';
+import { getTranslated } from '@/lib/getTranslated';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -27,9 +27,10 @@ export default function Home() {
   const productCountForCategory = (catId) =>
     products.filter((p) => p.category_id === catId).length;
 
-  const filtered = categories.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = categories.filter((c) => {
+    const translatedName = getTranslated(c, 'name', language);
+    return translatedName.toLowerCase().includes(search.toLowerCase());
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">

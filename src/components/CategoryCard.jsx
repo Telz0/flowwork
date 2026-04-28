@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
+import { useLanguage } from '@/lib/LanguageContext';
+import { getTranslated } from '@/lib/getTranslated';
 
 export default function CategoryCard({ category, productCount, onClick }) {
+  const { language } = useLanguage();
   const colors = [
     { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'bg-blue-500', text: 'text-blue-700', count: 'text-blue-500' },
     { bg: 'bg-emerald-50', border: 'border-emerald-200', icon: 'bg-emerald-500', text: 'text-emerald-700', count: 'text-emerald-500' },
@@ -10,7 +13,8 @@ export default function CategoryCard({ category, productCount, onClick }) {
     { bg: 'bg-rose-50', border: 'border-rose-200', icon: 'bg-rose-500', text: 'text-rose-700', count: 'text-rose-500' },
     { bg: 'bg-cyan-50', border: 'border-cyan-200', icon: 'bg-cyan-500', text: 'text-cyan-700', count: 'text-cyan-500' },
   ];
-  const colorIndex = Math.abs((category.name || '').charCodeAt(0) || 0) % colors.length;
+  const translatedName = getTranslated(category, 'name', language);
+  const colorIndex = Math.abs((translatedName || '').charCodeAt(0) || 0) % colors.length;
   const c = colors[colorIndex];
 
   return (
@@ -25,9 +29,9 @@ export default function CategoryCard({ category, productCount, onClick }) {
           <div className={`w-12 h-12 ${c.icon} rounded-xl flex items-center justify-center text-2xl mb-3 shadow-sm`}>
             {category.icon || '📦'}
           </div>
-          <h3 className={`font-bold text-lg ${c.text} truncate`}>{category.name}</h3>
-          {category.description && (
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{category.description}</p>
+          <h3 className={`font-bold text-lg ${c.text} truncate`}>{translatedName}</h3>
+          {getTranslated(category, 'description', language) && (
+            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{getTranslated(category, 'description', language)}</p>
           )}
           <p className={`text-xs font-semibold mt-2 ${c.count}`}>{productCount} product{productCount !== 1 ? 'en' : ''}</p>
         </div>

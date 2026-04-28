@@ -4,7 +4,19 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Productnaam"
+      "description": "Productnaam (Dutch - deprecated, use name_nl)"
+    },
+    "name_nl": {
+      "type": "string",
+      "description": "Productnaam in het Nederlands"
+    },
+    "name_fr": {
+      "type": "string",
+      "description": "Nom du produit en fran\u00e7ais"
+    },
+    "name_en": {
+      "type": "string",
+      "description": "Product name in English"
     },
     "category_id": {
       "type": "string",
@@ -12,7 +24,19 @@
     },
     "description": {
       "type": "string",
-      "description": "Korte omschrijving van het product"
+      "description": "Korte omschrijving van het product (Dutch - deprecated, use description_nl)"
+    },
+    "description_nl": {
+      "type": "string",
+      "description": "Korte omschrijving in het Nederlands"
+    },
+    "description_fr": {
+      "type": "string",
+      "description": "Description courte en fran\u00e7ais"
+    },
+    "description_en": {
+      "type": "string",
+      "description": "Short description in English"
     },
     "image_url": {
       "type": "string",
@@ -29,7 +53,7 @@
     }
   },
   "required": [
-    "name",
+    "name_nl",
     "category_id"
   ]
 }

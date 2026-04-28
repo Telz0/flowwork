@@ -6,9 +6,12 @@ import { ChevronLeft, ChevronRight, Loader2, Film, Clock, AlertTriangle, Play, P
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import QcFotoGalerij from '@/components/QcFotoGalerij';
+import { useLanguage } from '@/lib/LanguageContext';
+import { getTranslated } from '@/lib/getTranslated';
 import { useRef } from 'react';
 
 function StepPlayer({ step, steps }) {
+  const { language } = useLanguage();
   const videoRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -46,7 +49,7 @@ function StepPlayer({ step, steps }) {
           {steps.findIndex(s => s.id === step.id) + 1}
         </div>
         <div>
-          <h2 className="text-xl font-extrabold text-foreground">{step.title}</h2>
+          <h2 className="text-xl font-extrabold text-foreground">{getTranslated(step, 'title', language)}</h2>
           {step.duration_seconds && (
             <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
               <Clock className="w-3.5 h-3.5" />
@@ -92,24 +95,24 @@ function StepPlayer({ step, steps }) {
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-white/40 gap-2">
             <Film className="w-12 h-12" />
-            <span className="text-sm">Geen video beschikbaar</span>
+            <span className="text-sm">{language === 'nl' ? 'Geen video beschikbaar' : language === 'fr' ? 'Aucune vidéo disponible' : 'No video available'}</span>
           </div>
         )}
       </div>
 
       {/* Description */}
-      {step.description && (
-        <p className="text-foreground leading-relaxed mb-4">{step.description}</p>
+      {getTranslated(step, 'description', language) && (
+        <p className="text-foreground leading-relaxed mb-4">{getTranslated(step, 'description', language)}</p>
       )}
 
       {/* QC Foto's */}
-      <QcFotoGalerij qcItems={step.qc_items} photos={step.qc_photo_urls} label={step.qc_label} />
+      <QcFotoGalerij qcItems={step.qc_items} photos={step.qc_photo_urls} label={step.qc_label} language={language} />
 
       {/* Tips */}
-      {step.tips && (
+      {getTranslated(step, 'tips', language) && (
         <div className="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-800 leading-relaxed">{step.tips}</p>
+          <p className="text-sm text-amber-800 leading-relaxed">{getTranslated(step, 'tips', language)}</p>
         </div>
       )}
     </motion.div>
@@ -119,6 +122,7 @@ function StepPlayer({ step, steps }) {
 export default function ProductDetail() {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [activeStepId, setActiveStepId] = useState(null);
   const [lightboxItem, setLightboxItem] = useState(null);
 
@@ -145,7 +149,7 @@ export default function ProductDetail() {
 
   // Verzamel alle QC punten over alle stappen
   const allQcItems = steps.flatMap(step =>
-    (step.qc_items || []).map(item => ({ ...item, stepTitle: step.title }))
+    (step.qc_items || []).map(item => ({ ...item, stepTitle: getTranslated(step, 'title', language) }))
   );
   const hasQc = allQcItems.length > 0;
 
@@ -157,23 +161,23 @@ export default function ProductDetail() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 flex-wrap">
-        <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Categorieën</button>
+        <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">{language === 'nl' ? 'Categorieën' : language === 'fr' ? 'Catégories' : 'Categories'}</button>
         <ChevronRight className="w-3 h-3" />
-        <button onClick={() => navigate(`/categorie/${product?.category_id}`)} className="hover:text-foreground transition-colors">{category?.name || '...'}</button>
+        <button onClick={() => navigate(`/categorie/${product?.category_id}`)} className="hover:text-foreground transition-colors">{getTranslated(category, 'name', language) || '...'}</button>
         <ChevronRight className="w-3 h-3" />
-        <span className="text-foreground font-medium">{product?.name || '...'}</span>
+        <span className="text-foreground font-medium">{getTranslated(product, 'name', language) || '...'}</span>
       </div>
 
       <Button variant="ghost" onClick={() => navigate(`/categorie/${product?.category_id}`)} className="mb-4 -ml-2 text-muted-foreground hover:text-foreground">
-        <ChevronLeft className="w-4 h-4 mr-1" /> Terug naar producten
+        <ChevronLeft className="w-4 h-4 mr-1" /> {language === 'nl' ? 'Terug naar producten' : language === 'fr' ? 'Retour aux produits' : 'Back to products'}
       </Button>
 
       {/* Product header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">{product?.name}</h1>
-        {product?.description && <p className="text-muted-foreground mt-1">{product.description}</p>}
+        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">{getTranslated(product, 'name', language)}</h1>
+        {getTranslated(product, 'description', language) && <p className="text-muted-foreground mt-1">{getTranslated(product, 'description', language)}</p>}
         <span className="inline-block text-sm font-semibold text-primary bg-accent px-3 py-1 rounded-full mt-2">
-          {steps.length} productiestap{steps.length !== 1 ? 'pen' : ''}
+          {steps.length} {language === 'nl' ? `productiestap${steps.length !== 1 ? 'pen' : ''}` : language === 'fr' ? `étape${steps.length !== 1 ? 's' : ''}` : `production step${steps.length !== 1 ? 's' : ''}`}
         </span>
       </div>
 
@@ -184,8 +188,8 @@ export default function ProductDetail() {
       ) : steps.length === 0 ? (
         <div className="text-center py-24 text-muted-foreground flex flex-col items-center gap-3">
           <Film className="w-12 h-12 opacity-30" />
-          <p className="text-lg font-medium">Geen stappen beschikbaar</p>
-          <p className="text-sm">Vraag een teamleider om stappen en video's toe te voegen.</p>
+          <p className="text-lg font-medium">{language === 'nl' ? 'Geen stappen beschikbaar' : language === 'fr' ? 'Aucune étape disponible' : 'No steps available'}</p>
+          <p className="text-sm">{language === 'nl' ? 'Vraag een teamleider om stappen en video\'s toe te voegen.' : language === 'fr' ? 'Demandez à un chef d\'équipe d\'ajouter des étapes et des vidéos.' : 'Ask a team leader to add steps and videos.'}</p>
         </div>
       ) : (
         <>
@@ -203,7 +207,7 @@ export default function ProductDetail() {
                       {steps.findIndex(s => s.id === step.id) + 1}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold truncate">{step.title}</p>
+                      <p className="font-bold truncate">{getTranslated(step, 'title', language)}</p>
                       {step.duration_seconds && (
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                           <Clock className="w-3 h-3" />
@@ -227,7 +231,9 @@ export default function ProductDetail() {
                     </div>
                     <div className="min-w-0">
                       <p className="font-bold text-green-900">QC</p>
-                      <p className="text-xs text-green-700 mt-0.5">{allQcItems.length} controlepunt{allQcItems.length !== 1 ? 'en' : ''} over alle stappen</p>
+                      <p className="text-xs text-green-700 mt-0.5">
+                        {allQcItems.length} {language === 'nl' ? `controlepunt${allQcItems.length !== 1 ? 'en' : ''}` : language === 'fr' ? `point${allQcItems.length !== 1 ? 's' : ''}` : `point${allQcItems.length !== 1 ? 's' : ''}`} {language === 'nl' ? 'over alle stappen' : language === 'fr' ? 'sur toutes les étapes' : 'across all steps'}
+                      </p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-green-600 ml-auto flex-shrink-0" />
                   </div>
@@ -257,7 +263,7 @@ export default function ProductDetail() {
                       {steps.findIndex(s => s.id === step.id) + 1}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold truncate text-sm">{step.title}</p>
+                      <p className="font-semibold truncate text-sm">{getTranslated(step, 'title', language)}</p>
                       {step.duration_seconds && (
                         <p className={`text-xs flex items-center gap-1 mt-0.5 ${!isQcActive && activeStep?.id === step.id ? 'text-white/70' : 'text-muted-foreground'}`}>
                           <Clock className="w-3 h-3" />
@@ -285,7 +291,9 @@ export default function ProductDetail() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-sm">QC</p>
-                      <p className={`text-xs mt-0.5 ${isQcActive ? 'text-white/70' : 'text-green-700'}`}>{allQcItems.length} controlepunt{allQcItems.length !== 1 ? 'en' : ''}</p>
+                      <p className={`text-xs mt-0.5 ${isQcActive ? 'text-white/70' : 'text-green-700'}`}>
+                        {allQcItems.length} {language === 'nl' ? `controlepunt${allQcItems.length !== 1 ? 'en' : ''}` : language === 'fr' ? `point${allQcItems.length !== 1 ? 's' : ''}` : `point${allQcItems.length !== 1 ? 's' : ''}`}
+                      </p>
                     </div>
                   </div>
                 </button>
@@ -297,17 +305,17 @@ export default function ProductDetail() {
                   if (isQcActive) setActiveStepId(steps[steps.length - 1]?.id);
                   else if (activeIndex > 0) setActiveStepId(steps[activeIndex - 1].id);
                 }}>
-                  <ChevronLeft className="w-4 h-4 mr-1" /> Vorige
+                  <ChevronLeft className="w-4 h-4 mr-1" /> {language === 'nl' ? 'Vorige' : language === 'fr' ? 'Précédent' : 'Previous'}
                 </Button>
                 <Button size="sm" className="flex-1" disabled={isQcActive || (!hasQc && activeIndex >= steps.length - 1)} onClick={() => {
                   if (!isQcActive && activeIndex < steps.length - 1) setActiveStepId(steps[activeIndex + 1].id);
                   else if (!isQcActive && hasQc) setActiveStepId(QC_ID);
                 }}>
-                  Volgende <ChevronRight className="w-4 h-4 ml-1" />
+                  {language === 'nl' ? 'Volgende' : language === 'fr' ? 'Suivant' : 'Next'} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
               <p className="text-center text-xs text-muted-foreground">
-                {isQcActive ? 'QC Samenvatting' : `Stap ${activeIndex + 1} van ${steps.length}`}
+                {isQcActive ? (language === 'nl' ? 'QC Samenvatting' : language === 'fr' ? 'Résumé QC' : 'QC Summary') : `${language === 'nl' ? 'Stap' : language === 'fr' ? 'Étape' : 'Step'} ${activeIndex + 1} ${language === 'nl' ? 'van' : language === 'fr' ? 'sur' : 'of'} ${steps.length}`}
               </p>
             </div>
 
@@ -320,8 +328,8 @@ export default function ProductDetail() {
                       <ShieldCheck className="w-5 h-5" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-extrabold text-foreground">QC Samenvatting</h2>
-                      <p className="text-sm text-muted-foreground mt-0.5">Alle controlepunten voor {product?.name}</p>
+                      <h2 className="text-xl font-extrabold text-foreground">{language === 'nl' ? 'QC Samenvatting' : language === 'fr' ? 'Résumé QC' : 'QC Summary'}</h2>
+                      <p className="text-sm text-muted-foreground mt-0.5">{language === 'nl' ? 'Alle controlepunten voor' : language === 'fr' ? 'Tous les points de contrôle pour' : 'All check points for'} {getTranslated(product, 'name', language)}</p>
                     </div>
                   </div>
                   <div className="space-y-3">
@@ -333,8 +341,8 @@ export default function ProductDetail() {
                       >
                         <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-green-900 text-sm">{item.label || `Punt ${i + 1}`}</p>
-                          <p className="text-xs text-green-700 mt-0.5">Stap: {item.stepTitle}</p>
+                          <p className="font-semibold text-green-900 text-sm">{getTranslated(item, 'label', language) || (language === 'nl' ? `Punt ${i + 1}` : language === 'fr' ? `Point ${i + 1}` : `Point ${i + 1}`)}</p>
+                          <p className="text-xs text-green-700 mt-0.5">{language === 'nl' ? 'Stap' : language === 'fr' ? 'Étape' : 'Step'}: {item.stepTitle}</p>
                         </div>
                         {item.photo_url && (
                           <img src={item.photo_url} alt={item.label} className="w-14 h-14 rounded-lg object-cover border border-green-300 flex-shrink-0" />

@@ -5,10 +5,13 @@ import ProductCard from '@/components/ProductCard';
 import { ChevronLeft, Loader2, PackageOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/LanguageContext';
+import { getTranslated } from '@/lib/getTranslated';
 
 export default function CategoryDetail() {
   const { categoryId } = useParams();
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
   const { data: category } = useQuery({
     queryKey: ['category', categoryId],
@@ -36,7 +39,7 @@ export default function CategoryDetail() {
         className="mb-6 -ml-2 text-muted-foreground hover:text-foreground"
       >
         <ChevronLeft className="w-4 h-4 mr-1" />
-        Terug naar categorieën
+        {language === 'nl' ? 'Terug naar categorieën' : language === 'fr' ? 'Retour aux catégories' : 'Back to categories'}
       </Button>
 
       <div className="mb-8">
@@ -45,11 +48,11 @@ export default function CategoryDetail() {
             <span className="text-3xl">{category.icon}</span>
           )}
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-            {category?.name || 'Categorie'}
+            {getTranslated(category, 'name', language) || 'Categorie'}
           </h1>
         </div>
-        {category?.description && (
-          <p className="text-muted-foreground">{category.description}</p>
+        {getTranslated(category, 'description', language) && (
+          <p className="text-muted-foreground">{getTranslated(category, 'description', language)}</p>
         )}
       </div>
 
@@ -60,8 +63,12 @@ export default function CategoryDetail() {
       ) : products.length === 0 ? (
         <div className="text-center py-24 text-muted-foreground flex flex-col items-center gap-3">
           <PackageOpen className="w-12 h-12 opacity-30" />
-          <p className="text-lg font-medium">Geen producten in deze categorie</p>
-          <p className="text-sm">Vraag een beheerder of teamleider om producten toe te voegen.</p>
+          <p className="text-lg font-medium">
+            {language === 'nl' ? 'Geen producten in deze categorie' : language === 'fr' ? 'Aucun produit dans cette catégorie' : 'No products in this category'}
+          </p>
+          <p className="text-sm">
+            {language === 'nl' ? 'Vraag een beheerder of teamleider om producten toe te voegen.' : language === 'fr' ? 'Demandez à un administrateur ou un chef d\'équipe d\'ajouter des produits.' : 'Ask an administrator or team leader to add products.'}
+          </p>
         </div>
       ) : (
         <motion.div

@@ -4,11 +4,35 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Naam van de categorie"
+      "description": "Naam van de categorie (Dutch - deprecated, use name_nl)"
+    },
+    "name_nl": {
+      "type": "string",
+      "description": "Categorienaam in het Nederlands"
+    },
+    "name_fr": {
+      "type": "string",
+      "description": "Kategorienaam in het Frans"
+    },
+    "name_en": {
+      "type": "string",
+      "description": "Category name in English"
     },
     "description": {
       "type": "string",
-      "description": "Omschrijving van de categorie"
+      "description": "Omschrijving van de categorie (Dutch - deprecated, use description_nl)"
+    },
+    "description_nl": {
+      "type": "string",
+      "description": "Omschrijving in het Nederlands"
+    },
+    "description_fr": {
+      "type": "string",
+      "description": "Description en fran\u00e7ais"
+    },
+    "description_en": {
+      "type": "string",
+      "description": "Description in English"
     },
     "icon": {
       "type": "string",
@@ -24,6 +48,6 @@
     }
   },
   "required": [
-    "name"
+    "name_nl"
   ]
 }
