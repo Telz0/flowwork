@@ -27,15 +27,17 @@ export default function SharePointVerbinding({ folder, onFolderChange }) {
     setConnecting(true);
     try {
       const url = await base44.connectors.connectAppUser(CONNECTOR_ID);
-      console.log('SharePoint OAuth URL:', url);
-      if (!url) {
-        console.error('Geen OAuth URL ontvangen');
-        setConnecting(false);
+      if (!url) { setConnecting(false); return; }
+
+      // Op mobiel (bijv. iPhone) werken popups niet — navigeer direct
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.href = url;
         return;
       }
+
       const popup = window.open(url, '_blank', 'width=600,height=700');
       if (!popup) {
-        // Popup geblokkeerd - open in hetzelfde tabblad
         window.location.href = url;
         return;
       }
@@ -47,7 +49,6 @@ export default function SharePointVerbinding({ folder, onFolderChange }) {
         }
       }, 500);
     } catch (err) {
-      console.error('Connect fout:', err);
       setConnecting(false);
     }
   };
