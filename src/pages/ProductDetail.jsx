@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -10,7 +9,6 @@ import { motion } from 'framer-motion';
 export default function ProductDetail() {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(null);
 
   const { data: product } = useQuery({
     queryKey: ['product', productId],
@@ -85,12 +83,12 @@ export default function ProductDetail() {
           className="grid grid-cols-1 sm:grid-cols-2 gap-5"
         >
           {steps.map((step) => (
-            <StepVideoCard
-              key={step.id}
-              step={step}
-              isActive={activeStep === step.id}
-              onClick={() => setActiveStep(activeStep === step.id ? null : step.id)}
-            />
+              <StepVideoCard
+                key={step.id}
+                step={step}
+                isActive={false}
+                onClick={() => navigate(`/product/${productId}/stap/${step.id}`)}
+              />
           ))}
         </motion.div>
       )}
