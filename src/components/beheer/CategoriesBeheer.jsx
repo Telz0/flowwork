@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/lib/LanguageContext';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus, Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
 
 export default function CategoriesBeheer() {
+  const { language } = useLanguage();
   const queryClient = useQueryClient();
   const [form, setForm] = useState({ name: '', description: '', icon: '📦', order: 0 });
   const [editing, setEditing] = useState(null);
@@ -37,7 +39,7 @@ export default function CategoriesBeheer() {
   };
 
   const remove = async (id) => {
-    if (!confirm('Categorie verwijderen?')) return;
+    if (!confirm(language === 'nl' ? 'Categorie verwijderen?' : language === 'fr' ? 'Supprimer la catégorie ?' : 'Delete category?')) return;
     await base44.entities.Category.delete(id);
     queryClient.invalidateQueries({ queryKey: ['categories'] });
   };
@@ -51,30 +53,30 @@ export default function CategoriesBeheer() {
     <div className="grid lg:grid-cols-2 gap-8">
       {/* Form */}
       <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-        <h2 className="font-bold text-lg mb-5">{editing ? 'Categorie bewerken' : 'Nieuwe categorie'}</h2>
+        <h2 className="font-bold text-lg mb-5">{editing ? (language === 'nl' ? 'Categorie bewerken' : language === 'fr' ? 'Modifier la catégorie' : 'Edit category') : (language === 'nl' ? 'Nieuwe categorie' : language === 'fr' ? 'Nouvelle catégorie' : 'New category')}</h2>
         <div className="space-y-4">
           <div className="grid grid-cols-4 gap-3">
             <div>
-              <Label className="text-xs mb-1 block">Icoon</Label>
+              <Label className="text-xs mb-1 block">{language === 'nl' ? 'Icoon' : language === 'fr' ? 'Icône' : 'Icon'}</Label>
               <Input value={form.icon} onChange={e => setForm(f => ({ ...f, icon: e.target.value }))} className="text-center text-xl" maxLength={2} />
             </div>
             <div className="col-span-3">
-              <Label className="text-xs mb-1 block">Naam *</Label>
-              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Categorienaam" />
+              <Label className="text-xs mb-1 block">{language === 'nl' ? 'Naam *' : language === 'fr' ? 'Nom *' : 'Name *'}</Label>
+              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={language === 'nl' ? 'Categorienaam' : language === 'fr' ? 'Nom de la catégorie' : 'Category name'} />
             </div>
           </div>
           <div>
-            <Label className="text-xs mb-1 block">Omschrijving</Label>
-            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Korte omschrijving..." rows={2} />
+            <Label className="text-xs mb-1 block">{language === 'nl' ? 'Omschrijving' : language === 'fr' ? 'Description' : 'Description'}</Label>
+            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} rows={2} />
           </div>
           <div>
-            <Label className="text-xs mb-1 block">Volgorde</Label>
+            <Label className="text-xs mb-1 block">{language === 'nl' ? 'Volgorde' : language === 'fr' ? 'Ordre' : 'Order'}</Label>
             <Input type="number" value={form.order} onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))} />
           </div>
           <div className="flex gap-2">
             <Button onClick={save} disabled={!form.name || saving} className="flex-1">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
-              {editing ? 'Opslaan' : 'Aanmaken'}
+              {editing ? (language === 'nl' ? 'Opslaan' : language === 'fr' ? 'Enregistrer' : 'Save') : (language === 'nl' ? 'Aanmaken' : language === 'fr' ? 'Créer' : 'Create')}
             </Button>
             {editing && (
               <Button variant="outline" onClick={cancel}><X className="w-4 h-4" /></Button>
@@ -88,7 +90,7 @@ export default function CategoriesBeheer() {
         {isLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : categories.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-8">Nog geen categorieën.</p>
+          <p className="text-muted-foreground text-sm text-center py-8">{language === 'nl' ? 'Nog geen categorieën.' : language === 'fr' ? 'Pas encore de catégories.' : 'No categories yet.'}</p>
         ) : (
           categories.map(cat => (
             <div key={cat.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-3 shadow-sm">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/lib/LanguageContext';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Pencil, Trash2, X, Check, Loader2, Upload } from 'lucide-react';
 
 export default function ProductenBeheer({ isAdmin }) {
+  const { language } = useLanguage();
   const queryClient = useQueryClient();
   const [filterCategory, setFilterCategory] = useState('');
   const [form, setForm] = useState({ name: '', category_id: '', description: '', image_url: '', order: 0, is_active: true });
@@ -52,7 +54,7 @@ export default function ProductenBeheer({ isAdmin }) {
   };
 
   const remove = async (id) => {
-    if (!confirm('Product verwijderen?')) return;
+    if (!confirm(language === 'nl' ? 'Product verwijderen?' : language === 'fr' ? 'Supprimer le produit ?' : 'Delete product?')) return;
     await base44.entities.Product.delete(id);
     queryClient.invalidateQueries({ queryKey: ['products-all'] });
   };
@@ -62,7 +64,10 @@ export default function ProductenBeheer({ isAdmin }) {
     setForm({ name: '', category_id: '', description: '', image_url: '', order: 0, is_active: true });
   };
 
-  const catName = (id) => categories.find(c => c.id === id)?.name || id;
+  const catName = (id) => {
+    const cat = categories.find(c => c.id === id);
+    return cat?.name_nl || cat?.name || id;
+  };
 
   const filteredProducts = filterCategory
     ? products.filter(p => p.category_id === filterCategory)
@@ -77,10 +82,10 @@ export default function ProductenBeheer({ isAdmin }) {
     <div className="space-y-6">
       {/* Category filter */}
       <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
-        <Label className="text-sm font-semibold mb-2 block">Filter op categorie</Label>
+        <Label className="text-sm font-semibold mb-2 block">{language === 'nl' ? 'Filter op categorie' : language === 'fr' ? 'Filtrer par catégorie' : 'Filter by category'}</Label>
         <Select value={filterCategory} onValueChange={handleFilterCategory}>
           <SelectTrigger className="max-w-sm">
-            <SelectValue placeholder="Alle categorieën" />
+            <SelectValue placeholder={language === 'nl' ? 'Alle categorieën' : language === 'fr' ? 'Toutes les catégories' : 'All categories'} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={null}>Alle categorieën</SelectItem>
@@ -91,31 +96,31 @@ export default function ProductenBeheer({ isAdmin }) {
 
       <div className="grid lg:grid-cols-2 gap-8">
       <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-        <h2 className="font-bold text-lg mb-5">{editing ? 'Product bewerken' : 'Nieuw product'}</h2>
+        <h2 className="font-bold text-lg mb-5">{editing ? (language === 'nl' ? 'Product bewerken' : language === 'fr' ? 'Modifier le produit' : 'Edit product') : (language === 'nl' ? 'Nieuw product' : language === 'fr' ? 'Nouveau produit' : 'New product')}</h2>
         <div className="space-y-4">
           <div>
-            <Label className="text-xs mb-1 block">Naam *</Label>
-            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Productnaam" />
+            <Label className="text-xs mb-1 block">{language === 'nl' ? 'Naam *' : language === 'fr' ? 'Nom *' : 'Name *'}</Label>
+            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={language === 'nl' ? 'Productnaam' : language === 'fr' ? 'Nom du produit' : 'Product name'} />
           </div>
           <div>
-            <Label className="text-xs mb-1 block">Categorie *</Label>
+            <Label className="text-xs mb-1 block">{language === 'nl' ? 'Categorie *' : language === 'fr' ? 'Catégorie *' : 'Category *'}</Label>
             <Select value={form.category_id} onValueChange={v => setForm(f => ({ ...f, category_id: v }))}>
               <SelectTrigger>
-                <SelectValue placeholder="Kies categorie..." />
+                <SelectValue placeholder={language === 'nl' ? 'Kies categorie...' : language === 'fr' ? 'Choisir une catégorie...' : 'Choose category...'} />
               </SelectTrigger>
               <SelectContent>
-                {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}
+                {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name_nl || c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label className="text-xs mb-1 block">Omschrijving</Label>
-            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Korte omschrijving..." />
+            <Label className="text-xs mb-1 block">{language === 'nl' ? 'Omschrijving' : language === 'fr' ? 'Description' : 'Description'}</Label>
+            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} />
           </div>
           <div>
-            <Label className="text-xs mb-1 block">Afbeelding</Label>
+            <Label className="text-xs mb-1 block">{language === 'nl' ? 'Afbeelding' : language === 'fr' ? 'Image' : 'Image'}</Label>
             <div className="flex gap-2">
-              <Input value={form.image_url} onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))} placeholder="https://... of upload →" className="flex-1" />
+              <Input value={form.image_url} onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))} placeholder={language === 'nl' ? 'https://... of upload →' : language === 'fr' ? 'https://... ou télécharger →' : 'https://... or upload →'} className="flex-1" />
               <label className="cursor-pointer">
                 <Button type="button" variant="outline" size="icon" disabled={uploading} asChild>
                   <span>{uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}</span>
@@ -128,7 +133,7 @@ export default function ProductenBeheer({ isAdmin }) {
           <div className="flex gap-2">
             <Button onClick={save} disabled={!form.name || !form.category_id || saving} className="flex-1">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
-              {editing ? 'Opslaan' : 'Aanmaken'}
+              {editing ? (language === 'nl' ? 'Opslaan' : language === 'fr' ? 'Enregistrer' : 'Save') : (language === 'nl' ? 'Aanmaken' : language === 'fr' ? 'Créer' : 'Create')}
             </Button>
             {editing && <Button variant="outline" onClick={cancel}><X className="w-4 h-4" /></Button>}
           </div>
@@ -139,7 +144,7 @@ export default function ProductenBeheer({ isAdmin }) {
         {isLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : filteredProducts.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-8">Geen producten gevonden.</p>
+          <p className="text-muted-foreground text-sm text-center py-8">{language === 'nl' ? 'Geen producten gevonden.' : language === 'fr' ? 'Aucun produit trouvé.' : 'No products found.'}</p>
         ) : (
           filteredProducts.map(p => (
             <div key={p.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-3 shadow-sm">

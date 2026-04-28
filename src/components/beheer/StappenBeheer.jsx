@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/lib/LanguageContext';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import SharePointVerbinding from './SharePointVerbinding';
 import QcFotoUpload from './QcFotoUpload';
 
 export default function StappenBeheer({ isAdmin }) {
+  const { language } = useLanguage();
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
@@ -76,7 +78,7 @@ export default function StappenBeheer({ isAdmin }) {
   };
 
   const remove = async (id) => {
-    if (!confirm('Stap verwijderen?')) return;
+    if (!confirm(language === 'nl' ? 'Stap verwijderen?' : language === 'fr' ? 'Supprimer l\'étape ?' : 'Delete step?')) return;
     await base44.entities.ProductionStep.delete(id);
     queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
   };
@@ -114,24 +116,24 @@ export default function StappenBeheer({ isAdmin }) {
       <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <Label className="text-sm font-semibold mb-2 block">1. Kies een categorie</Label>
+            <Label className="text-sm font-semibold mb-2 block">{language === 'nl' ? '1. Kies een categorie' : language === 'fr' ? '1. Choisir une catégorie' : '1. Choose category'}</Label>
             <Select value={selectedCategory} onValueChange={handleCategorySelect}>
               <SelectTrigger>
-                <SelectValue placeholder="Kies categorie..." />
+                <SelectValue placeholder={language === 'nl' ? 'Kies categorie...' : language === 'fr' ? 'Choisir une catégorie...' : 'Choose category...'} />
               </SelectTrigger>
               <SelectContent>
-                {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}
+                {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name_nl || c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="flex-1">
-            <Label className="text-sm font-semibold mb-2 block">2. Kies een product</Label>
+            <Label className="text-sm font-semibold mb-2 block">{language === 'nl' ? '2. Kies een product' : language === 'fr' ? '2. Choisir un produit' : '2. Choose product'}</Label>
             <Select value={selectedProduct} onValueChange={handleProductSelect} disabled={!selectedCategory}>
               <SelectTrigger>
-                <SelectValue placeholder={selectedCategory ? 'Kies product...' : 'Eerst categorie kiezen'} />
+                <SelectValue placeholder={selectedCategory ? (language === 'nl' ? 'Kies product...' : language === 'fr' ? 'Choisir un produit...' : 'Choose product...') : (language === 'nl' ? 'Eerst categorie kiezen' : language === 'fr' ? 'Choisir d\'abord une catégorie' : 'Choose category first')} />
               </SelectTrigger>
               <SelectContent>
-                {filteredProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                {filteredProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name_nl || p.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -147,7 +149,7 @@ export default function StappenBeheer({ isAdmin }) {
             ) : steps.length === 0 ? (
               <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-2">
                 <Film className="w-10 h-10 opacity-30" />
-                <p className="text-sm">Nog geen stappen. Voeg de eerste stap toe.</p>
+                <p className="text-sm">{language === 'nl' ? 'Nog geen stappen. Voeg de eerste stap toe.' : language === 'fr' ? 'Pas encore d\'étapes. Ajoutez la première étape.' : 'No steps yet. Add the first step.'}</p>
               </div>
             ) : (
               steps.map((s, idx) => (
@@ -162,7 +164,7 @@ export default function StappenBeheer({ isAdmin }) {
                         {s.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{s.description}</p>}
                         {s.video_url && (
                           <span className="inline-flex items-center gap-1 text-xs text-primary mt-1">
-                            <Film className="w-3 h-3" /> Video aanwezig
+                            <Film className="w-3 h-3" /> {language === 'nl' ? 'Video aanwezig' : language === 'fr' ? 'Vidéo présente' : 'Video attached'}
                           </span>
                         )}
                       </div>
@@ -179,26 +181,26 @@ export default function StappenBeheer({ isAdmin }) {
 
           {/* Form */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm order-last lg:order-first">
-            <h2 className="font-bold text-lg mb-5">{editing ? 'Stap bewerken' : 'Nieuwe stap'}</h2>
+            <h2 className="font-bold text-lg mb-5">{editing ? (language === 'nl' ? 'Stap bewerken' : language === 'fr' ? 'Modifier l\'étape' : 'Edit step') : (language === 'nl' ? 'Nieuwe stap' : language === 'fr' ? 'Nouvelle étape' : 'New step')}</h2>
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs mb-1 block">Volgorde index</Label>
+                  <Label className="text-xs mb-1 block">{language === 'nl' ? 'Volgorde index' : language === 'fr' ? 'Index d\'ordre' : 'Order index'}</Label>
                   <Input type="number" min={1} step={100} value={form.order_index} onChange={e => setForm(f => ({ ...f, order_index: parseInt(e.target.value) || 100 }))} />
                 </div>
                 <div className="col-span-2">
-                  <Label className="text-xs mb-1 block">Titel *</Label>
-                  <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Staptitel" />
+                  <Label className="text-xs mb-1 block">{language === 'nl' ? 'Titel *' : language === 'fr' ? 'Titre *' : 'Title *'}</Label>
+                  <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder={language === 'nl' ? 'Staptitel' : language === 'fr' ? 'Titre de l\'étape' : 'Step title'} />
                 </div>
               </div>
               <div>
-                <Label className="text-xs mb-1 block">Uitleg / omschrijving</Label>
-                <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Wat moet de medewerker doen?" />
+                <Label className="text-xs mb-1 block">{language === 'nl' ? 'Uitleg / omschrijving' : language === 'fr' ? 'Explication / description' : 'Explanation / description'}</Label>
+                <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder={language === 'nl' ? 'Wat moet de medewerker doen?' : language === 'fr' ? 'Que doit faire l\'employé ?' : 'What should the employee do?'} />
               </div>
               <div>
-                <Label className="text-xs mb-1 block">Instructievideo</Label>
+                <Label className="text-xs mb-1 block">{language === 'nl' ? 'Instructievideo' : language === 'fr' ? 'Vidéo d\'instruction' : 'Instruction video'}</Label>
                 <div className="flex gap-2 mb-2">
-                  <Input value={form.video_url} onChange={e => setForm(f => ({ ...f, video_url: e.target.value }))} placeholder="https://... of upload →" className="flex-1" />
+                  <Input value={form.video_url} onChange={e => setForm(f => ({ ...f, video_url: e.target.value }))} placeholder={language === 'nl' ? 'https://... of upload →' : language === 'fr' ? 'https://... ou télécharger →' : 'https://... or upload →'} className="flex-1" />
                   <label className="cursor-pointer">
                     <Button type="button" variant="outline" size="icon" disabled={uploading} asChild>
                       <span>{uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}</span>
@@ -212,13 +214,13 @@ export default function StappenBeheer({ isAdmin }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs mb-1 block">Duur (seconden)</Label>
-                  <Input type="number" value={form.duration_seconds} onChange={e => setForm(f => ({ ...f, duration_seconds: e.target.value }))} placeholder="bijv. 120" />
+                  <Label className="text-xs mb-1 block">{language === 'nl' ? 'Duur (seconden)' : language === 'fr' ? 'Durée (secondes)' : 'Duration (seconds)'}</Label>
+                  <Input type="number" value={form.duration_seconds} onChange={e => setForm(f => ({ ...f, duration_seconds: e.target.value }))} placeholder={language === 'nl' ? 'bijv. 120' : language === 'fr' ? 'ex. 120' : 'e.g. 120'} />
                 </div>
               </div>
               <div>
-                <Label className="text-xs mb-1 block">Tips / waarschuwingen</Label>
-                <Textarea value={form.tips} onChange={e => setForm(f => ({ ...f, tips: e.target.value }))} rows={2} placeholder="Veiligheidstips, aandachtspunten..." />
+                <Label className="text-xs mb-1 block">{language === 'nl' ? 'Tips / waarschuwingen' : language === 'fr' ? 'Conseils / avertissements' : 'Tips / warnings'}</Label>
+                <Textarea value={form.tips} onChange={e => setForm(f => ({ ...f, tips: e.target.value }))} rows={2} placeholder={language === 'nl' ? 'Veiligheidstips, aandachtspunten...' : language === 'fr' ? 'Conseils de sécurité, points d\'attention...' : 'Safety tips, points of attention...'} />
               </div>
               <QcFotoUpload
                 qcItems={form.qc_items}
@@ -227,7 +229,7 @@ export default function StappenBeheer({ isAdmin }) {
               <div className="flex gap-2">
                 <Button onClick={save} disabled={!form.title || saving} className="flex-1">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
-                  {editing ? 'Opslaan' : 'Stap toevoegen'}
+                  {editing ? (language === 'nl' ? 'Opslaan' : language === 'fr' ? 'Enregistrer' : 'Save') : (language === 'nl' ? 'Stap toevoegen' : language === 'fr' ? 'Ajouter une étape' : 'Add step')}
                 </Button>
                 {editing && <Button variant="outline" onClick={cancel}><X className="w-4 h-4" /></Button>}
               </div>
