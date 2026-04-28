@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Check, Pencil, Trash2, X, Loader2, Upload, Film } from 'lucide-react';
+import SharePointVerbinding from './SharePointVerbinding';
 
 export default function StappenBeheer({ isAdmin }) {
   const queryClient = useQueryClient();
@@ -37,8 +38,17 @@ export default function StappenBeheer({ isAdmin }) {
 
   const uploadVideo = async (file) => {
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setForm(f => ({ ...f, video_url: file_url }));
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'Werkinstructies');
+      const res = await base44.functions.invoke('uploadToSharePoint', formData);
+      setForm(f => ({ ...f, video_url: res.data.file_url }));
+    } catch (err) {
+      // Fallback to Base44 storage if SharePoint not connected
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setForm(f => ({ ...f, video_url: file_url }));
+    }
     setUploading(false);
   };
 
@@ -93,6 +103,9 @@ export default function StappenBeheer({ isAdmin }) {
 
   return (
     <div className="space-y-6">
+      {/* SharePoint verbinding status */}
+      <SharePointVerbinding />
+
       {/* Category + Product selector */}
       <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
         <div className="flex flex-col sm:flex-row gap-4">
