@@ -12,39 +12,60 @@ Deno.serve(async (req) => {
 
     const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
 
-    // Get root site info
-    const rootRes = await fetch('https://graph.microsoft.com/v1.0/sites/root', {
+    // Get all sites the user has access to
+    const sitesRes = await fetch('https://graph.microsoft.com/v1.0/sites?search=*', {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
-    const rootData = await rootRes.json();
-    const siteId = rootData.id;
+    const sitesData = await sitesRes.json();
+    const sites = sitesData.value || [];
 
-    if (!siteId) {
-      return Response.json({ error: 'Kan SharePoint site niet ophalen', details: rootData }, { status: 500 });
+    // Try each site to find drives with folders
+    let allFolders = [];
+    let usedDriveId = null;
+
+    for (const site of sites) {
+      const drivesRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${site.id}/drives`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const drivesData = await drivesRes.json();
+      const drives = drivesData.value || [];
+
+      for (const drive of drives) {
+        const foldersRes = await fetch(`https://graph.microsoft.com/v1.0/drives/${drive.id}/root/children`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const foldersData = await foldersRes.json();
+        const folders = (foldersData.value || []).filter(item => item.folder);
+
+        if (folders.length > 0) {
+          allFolders = folders.map(item => ({ id: item.id, name: item.name, path: item.name, driveId: drive.id, siteId: site.id }));
+          usedDriveId = drive.id;
+          break;
+        }
+      }
+      if (allFolders.length > 0) break;
     }
 
-    // Get default document library drive
-    const drivesRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${siteId}/drives`, {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
-    const drivesData = await drivesRes.json();
-    const drive = drivesData.value?.find(d => d.driveType === 'documentLibrary') || drivesData.value?.[0];
-
-    if (!drive) {
-      return Response.json({ error: 'Geen document library gevonden' }, { status: 500 });
+    // Fallback: try root site
+    if (allFolders.length === 0) {
+      const rootRes = await fetch('https://graph.microsoft.com/v1.0/sites/root/drives', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const rootDrives = await rootRes.json();
+      const drive = (rootDrives.value || [])[0];
+      if (drive) {
+        const foldersRes = await fetch(`https://graph.microsoft.com/v1.0/drives/${drive.id}/root/children`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const foldersData = await foldersRes.json();
+        allFolders = (foldersData.value || [])
+          .filter(item => item.folder)
+          .map(item => ({ id: item.id, name: item.name, path: item.name, driveId: drive.id }));
+        usedDriveId = drive.id;
+      }
     }
 
-    // Get root folders
-    const foldersRes = await fetch(`https://graph.microsoft.com/v1.0/drives/${drive.id}/root/children`, {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
-    const foldersData = await foldersRes.json();
-
-    const folders = (foldersData.value || [])
-      .filter(item => item.folder)
-      .map(item => ({ id: item.id, name: item.name, path: item.name }));
-
-    return Response.json({ folders, driveId: drive.id });
+    return Response.json({ folders: allFolders, driveId: usedDriveId, sitesFound: sites.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
