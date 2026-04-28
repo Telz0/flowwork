@@ -1,36 +1,28 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Link2, LogOut, Loader2, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { CheckCircle2, Link2, LogOut, Loader2, AlertCircle, FolderOpen } from 'lucide-react';
 
 const CONNECTOR_ID = "69f08e6060f2243cb70a95b4";
 
-export default function SharePointVerbinding() {
+export default function SharePointVerbinding({ folder, onFolderChange }) {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
 
   const checkConnection = async () => {
     try {
-      // Try a simple call to see if connected
-      const res = await base44.functions.invoke('uploadToSharePoint', {});
-      // If we get a 400 (no file) instead of 401/500 auth error, we're connected
+      await base44.functions.invoke('uploadToSharePoint', {});
       setConnected(true);
     } catch (err) {
       const msg = err?.response?.data?.error || err?.message || '';
-      // "Geen bestand ontvangen" means auth worked, just no file sent
-      if (msg.includes('bestand') || msg.includes('file') || msg.includes('folder')) {
-        setConnected(true);
-      } else {
-        setConnected(false);
-      }
+      setConnected(msg.includes('bestand') || msg.includes('file') || msg.includes('folder'));
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    checkConnection();
-  }, []);
+  useEffect(() => { checkConnection(); }, []);
 
   const handleConnect = async () => {
     setConnecting(true);
@@ -59,13 +51,21 @@ export default function SharePointVerbinding() {
   }
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${connected ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+    <div className={`flex flex-wrap items-center gap-3 px-4 py-3 rounded-xl border ${connected ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
       {connected ? (
         <>
           <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-green-800">SharePoint verbonden</p>
-            <p className="text-xs text-green-700">Video's worden geüpload naar SharePoint.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <FolderOpen className="w-4 h-4 text-green-700 flex-shrink-0" />
+            <Input
+              value={folder}
+              onChange={e => onFolderChange(e.target.value)}
+              placeholder="Map bijv. Werkinstructies"
+              className="h-7 text-xs w-44 bg-white border-green-300 focus-visible:ring-green-400"
+            />
           </div>
           <Button variant="outline" size="sm" onClick={handleDisconnect} className="text-xs border-green-300 text-green-800 hover:bg-green-100">
             <LogOut className="w-3 h-3 mr-1" /> Ontkoppelen
