@@ -24,17 +24,17 @@ export default function Beheer() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">{language === 'nl' ? 'Beheer' : language === 'fr' ? 'Gestion' : 'Management'}</h1>
-        <p className="text-muted-foreground mt-1">{language === 'nl' ? 'Beheer categorieën, producten en instructievideo\'s.' : language === 'fr' ? 'Gérez les catégories, les produits et les vidéos d\'instruction.' : 'Manage categories, products and instruction videos.'}</p>
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">{language === 'nl' ? 'Beheer' : language === 'fr' ? 'Gestion' : 'Management'}</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1">{language === 'nl' ? 'Beheer categorieën, producten en instructievideo\'s.' : language === 'fr' ? 'Gérez les catégories, les produits et les vidéos d\'instruction.' : 'Manage categories, products and instruction videos.'}</p>
       </div>
 
       <Tabs defaultValue="categorieen">
-        <TabsList className="mb-6">
-          {isAdmin && <TabsTrigger value="categorieen">{language === 'nl' ? 'Categorieën' : language === 'fr' ? 'Catégories' : 'Categories'}</TabsTrigger>}
-          <TabsTrigger value="producten">{language === 'nl' ? 'Producten' : language === 'fr' ? 'Produits' : 'Products'}</TabsTrigger>
-          <TabsTrigger value="stappen">{language === 'nl' ? 'Stappen & Video\'s' : language === 'fr' ? 'Étapes & Vidéos' : 'Steps & Videos'}</TabsTrigger>
+        <TabsList className="mb-6 w-full grid grid-cols-2 sm:flex sm:w-auto h-auto sm:h-10">
+          {isAdmin && <TabsTrigger value="categorieen" className="text-xs sm:text-sm">{language === 'nl' ? 'Categorieën' : language === 'fr' ? 'Catégories' : 'Categories'}</TabsTrigger>}
+          <TabsTrigger value="producten" className="text-xs sm:text-sm">{language === 'nl' ? 'Producten' : language === 'fr' ? 'Produits' : 'Products'}</TabsTrigger>
+          <TabsTrigger value="stappen" className="text-xs sm:text-sm">{language === 'nl' ? 'Stappen & Video\'s' : language === 'fr' ? 'Étapes & Vidéos' : 'Steps & Videos'}</TabsTrigger>
         </TabsList>
         {isAdmin && (
           <TabsContent value="categorieen">
