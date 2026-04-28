@@ -94,8 +94,8 @@ export default function ProductenBeheer({ isAdmin }) {
         </Select>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm order-last lg:order-first">
+      <div className="grid lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 w-full">
+      <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 shadow-sm order-last lg:order-first min-w-0">
         <h2 className="font-bold text-base sm:text-lg mb-4">{editing ? (language === 'nl' ? 'Product bewerken' : language === 'fr' ? 'Modifier le produit' : 'Edit product') : (language === 'nl' ? 'Nieuw product' : language === 'fr' ? 'Nouveau produit' : 'New product')}</h2>
         <div className="space-y-3">
           <div>
@@ -140,14 +140,14 @@ export default function ProductenBeheer({ isAdmin }) {
         </div>
       </div>
 
-      <div className="space-y-2 order-first lg:order-last">
+      <div className="space-y-2 order-first lg:order-last min-w-0 w-full">
         {isLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : filteredProducts.length === 0 ? (
           <p className="text-muted-foreground text-xs sm:text-sm text-center py-8">{language === 'nl' ? 'Geen producten gevonden.' : language === 'fr' ? 'Aucun produit trouvé.' : 'No products found.'}</p>
         ) : (
           filteredProducts.map(p => (
-            <div key={p.id} className="bg-card border border-border rounded-xl p-3 sm:p-4 flex items-center justify-between gap-2 sm:gap-3 shadow-sm">
+            <div key={p.id} className="bg-card border border-border rounded-lg p-2 sm:p-3 flex items-center justify-between gap-2 shadow-sm min-w-0">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                 {p.image_url && <img src={p.image_url} alt="" className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg object-cover flex-shrink-0" />}
                 <div className="min-w-0">
