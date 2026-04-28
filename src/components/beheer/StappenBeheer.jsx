@@ -51,7 +51,7 @@ export default function StappenBeheer({ isAdmin }) {
       await base44.entities.ProductionStep.create(data);
     }
     await queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
-    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: (steps.length + 1), duration_seconds: '', tips: '' });
+    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: nextStepNumber + 1, duration_seconds: '', tips: '' });
     setEditing(null);
     setSaving(false);
   };
@@ -69,7 +69,7 @@ export default function StappenBeheer({ isAdmin }) {
 
   const cancel = () => {
     setEditing(null);
-    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: (steps.length + 1), duration_seconds: '', tips: '' });
+    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: nextStepNumber, duration_seconds: '', tips: '' });
   };
 
   const handleCategorySelect = (val) => {
@@ -84,6 +84,8 @@ export default function StappenBeheer({ isAdmin }) {
     setForm(f => ({ ...f, product_id: val, step_number: 1 }));
     setEditing(null);
   };
+
+  const nextStepNumber = steps.length > 0 ? Math.max(...steps.map(s => s.step_number)) + 1 : 1;
 
   const filteredProducts = selectedCategory
     ? products.filter(p => p.category_id === selectedCategory)
@@ -121,14 +123,51 @@ export default function StappenBeheer({ isAdmin }) {
 
       {selectedProduct && (
         <div className="grid lg:grid-cols-2 gap-8">
+          {/* Steps list - shown first on mobile/tablet, second on desktop */}
+          <div className="space-y-3 order-first lg:order-last">
+            {loadingSteps ? (
+              <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+            ) : steps.length === 0 ? (
+              <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-2">
+                <Film className="w-10 h-10 opacity-30" />
+                <p className="text-sm">Nog geen stappen. Voeg de eerste stap toe.</p>
+              </div>
+            ) : (
+              steps.map(s => (
+                <div key={s.id} className="bg-card border border-border rounded-xl p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-xs font-bold flex-shrink-0">
+                        {s.step_number}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold truncate">{s.title}</p>
+                        {s.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{s.description}</p>}
+                        {s.video_url && (
+                          <span className="inline-flex items-center gap-1 text-xs text-primary mt-1">
+                            <Film className="w-3 h-3" /> Video aanwezig
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <Button variant="ghost" size="icon" onClick={() => startEdit(s)}><Pencil className="w-4 h-4" /></Button>
+                      {isAdmin && <Button variant="ghost" size="icon" onClick={() => remove(s.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
           {/* Form */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm order-last lg:order-first">
             <h2 className="font-bold text-lg mb-5">{editing ? 'Stap bewerken' : 'Nieuwe stap'}</h2>
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label className="text-xs mb-1 block">Stap #</Label>
-                  <Input type="number" min={1} value={form.step_number} onChange={e => setForm(f => ({ ...f, step_number: parseInt(e.target.value) || 1 }))} />
+                  <Input type="number" min={1} value={editing ? form.step_number : nextStepNumber} onChange={e => setForm(f => ({ ...f, step_number: parseInt(e.target.value) || 1 }))} />
                 </div>
                 <div className="col-span-2">
                   <Label className="text-xs mb-1 block">Titel *</Label>
@@ -174,42 +213,6 @@ export default function StappenBeheer({ isAdmin }) {
             </div>
           </div>
 
-          {/* Steps list */}
-          <div className="space-y-3">
-            {loadingSteps ? (
-              <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-            ) : steps.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground flex flex-col items-center gap-2">
-                <Film className="w-10 h-10 opacity-30" />
-                <p className="text-sm">Nog geen stappen. Voeg de eerste stap toe.</p>
-              </div>
-            ) : (
-              steps.map(s => (
-                <div key={s.id} className="bg-card border border-border rounded-xl p-4 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-xs font-bold flex-shrink-0">
-                        {s.step_number}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold truncate">{s.title}</p>
-                        {s.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{s.description}</p>}
-                        {s.video_url && (
-                          <span className="inline-flex items-center gap-1 text-xs text-primary mt-1">
-                            <Film className="w-3 h-3" /> Video aanwezig
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-1 flex-shrink-0">
-                      <Button variant="ghost" size="icon" onClick={() => startEdit(s)}><Pencil className="w-4 h-4" /></Button>
-                      {isAdmin && <Button variant="ghost" size="icon" onClick={() => remove(s.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
         </div>
       )}
     </div>
