@@ -17,7 +17,6 @@ export default function StappenBeheer({ isAdmin }) {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [spFolder, setSpFolder] = useState('Werkinstructies');
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -42,7 +41,7 @@ export default function StappenBeheer({ isAdmin }) {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('folder', spFolder);
+
       const res = await base44.functions.invoke('uploadToSharePoint', formData);
       setForm(f => ({ ...f, video_url: res.data.file_url }));
     } catch (err) {
@@ -105,7 +104,7 @@ export default function StappenBeheer({ isAdmin }) {
   return (
     <div className="space-y-6">
       {/* SharePoint verbinding status */}
-      <SharePointVerbinding folder={spFolder} onFolderChange={setSpFolder} />
+      <SharePointVerbinding />
 
       {/* Category + Product selector */}
       <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">

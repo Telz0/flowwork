@@ -1,6 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const CONNECTOR_ID = "69f08e6060f2243cb70a95b4";
+// Vaste uploadlocatie: Documents > Hub > Instructies > APP video's
+const SITE_ID = "abvandbynd.sharepoint.com,e090a3d3-7b56-4f47-b93e-515db3101555,ff72c900-be6c-4287-a5ff-f96bf739b27a";
+const FOLDER_PATH = "Hub/Instructies/APP video's";
 
 Deno.serve(async (req) => {
   try {
@@ -10,43 +13,36 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    let file, folder;
-    try {
-      const formData = await req.formData();
-      file = formData.get('file');
-      folder = formData.get('folder') || 'Werkinstructies';
-    } catch {
-      return Response.json({ error: 'Ongeldige form data' }, { status: 400 });
-    }
-
+    const formData = await req.formData();
+    const file = formData.get('file');
     if (!file) {
       return Response.json({ error: 'Geen bestand ontvangen' }, { status: 400 });
     }
 
-    const { accessToken, connectionConfig } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
-    const sitePath = connectionConfig?.subdomain ?? "";
-
-    // Get tenant from Graph API
-    const rootRes = await fetch('https://graph.microsoft.com/v1.0/sites/root', {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
-    const rootData = await rootRes.json();
-    const hostname = rootData.siteCollection?.hostname;
-    if (!hostname) {
-      return Response.json({ error: 'Kan SharePoint tenant niet ophalen', details: rootData }, { status: 500 });
-    }
+    const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
 
     const fileName = file.name || `video_${Date.now()}.mp4`;
     const fileBuffer = await file.arrayBuffer();
 
-    // Upload via SharePoint REST API
-    const uploadUrl = `https://${hostname}/${sitePath}/_api/web/GetFolderByServerRelativeUrl('${folder}')/Files/add(url='${encodeURIComponent(fileName)}',overwrite=true)`;
+    // Start upload sessie via Microsoft Graph
+    const sessionRes = await fetch(
+      `https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drive/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item: { "@microsoft.graph.conflictBehavior": "rename" } })
+      }
+    );
+    const sessionData = await sessionRes.json();
+    if (!sessionData.uploadUrl) {
+      return Response.json({ error: 'Kan upload sessie niet starten', details: sessionData }, { status: 500 });
+    }
 
-    const uploadRes = await fetch(uploadUrl, {
-      method: 'POST',
+    // Upload bestand
+    const uploadRes = await fetch(sessionData.uploadUrl, {
+      method: 'PUT',
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: 'application/json;odata=verbose',
+        'Content-Range': `bytes 0-${fileBuffer.byteLength - 1}/${fileBuffer.byteLength}`,
         'Content-Length': fileBuffer.byteLength.toString(),
       },
       body: fileBuffer,
@@ -58,10 +54,7 @@ Deno.serve(async (req) => {
     }
 
     const result = await uploadRes.json();
-    const serverRelativeUrl = result?.d?.ServerRelativeUrl;
-    const fileUrl = `https://${hostname}${serverRelativeUrl}`;
-
-    return Response.json({ file_url: fileUrl, file_name: fileName });
+    return Response.json({ file_url: result.webUrl, file_name: fileName });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

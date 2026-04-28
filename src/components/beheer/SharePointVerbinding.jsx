@@ -1,39 +1,23 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckCircle2, Link2, LogOut, Loader2, AlertCircle, FolderOpen } from 'lucide-react';
+import { CheckCircle2, Link2, LogOut, Loader2, AlertCircle } from 'lucide-react';
 
 const CONNECTOR_ID = "69f08e6060f2243cb70a95b4";
 
-export default function SharePointVerbinding({ folder, onFolderChange }) {
+export default function SharePointVerbinding() {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
-  const [folders, setFolders] = useState([]);
-  const [loadingFolders, setLoadingFolders] = useState(false);
 
   const checkConnection = async () => {
     try {
       const res = await base44.functions.invoke('checkSharePointConnection', {});
-      const isConnected = res.data?.connected === true;
-      setConnected(isConnected);
-      if (isConnected) loadFolders();
-    } catch (err) {
+      setConnected(res.data?.connected === true);
+    } catch {
       setConnected(false);
     }
     setLoading(false);
-  };
-
-  const loadFolders = async () => {
-    setLoadingFolders(true);
-    try {
-      const res = await base44.functions.invoke('getSharePointFolders', {});
-      setFolders(res.data?.folders || []);
-    } catch (err) {
-      setFolders([]);
-    }
-    setLoadingFolders(false);
   };
 
   useEffect(() => { checkConnection(); }, []);
@@ -44,7 +28,6 @@ export default function SharePointVerbinding({ folder, onFolderChange }) {
       const url = await base44.connectors.connectAppUser(CONNECTOR_ID);
       if (!url) { setConnecting(false); return; }
 
-      // Op mobiel (bijv. iPhone) werken popups niet — navigeer direct
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       if (isMobile) {
         window.location.href = url;
@@ -63,7 +46,7 @@ export default function SharePointVerbinding({ folder, onFolderChange }) {
           checkConnection();
         }
       }, 500);
-    } catch (err) {
+    } catch {
       setConnecting(false);
     }
   };
@@ -88,23 +71,7 @@ export default function SharePointVerbinding({ folder, onFolderChange }) {
           <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-green-800">SharePoint verbonden</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <FolderOpen className="w-4 h-4 text-green-700 flex-shrink-0" />
-            {loadingFolders ? (
-              <Loader2 className="w-4 h-4 animate-spin text-green-600" />
-            ) : (
-              <Select value={folder} onValueChange={onFolderChange}>
-                <SelectTrigger className="h-7 text-xs w-48 bg-white border-green-300 focus:ring-green-400">
-                  <SelectValue placeholder="Kies een map..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {folders.map(f => (
-                    <SelectItem key={f.id} value={f.name}>{f.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <p className="text-xs text-green-700">Video's worden geüpload naar <strong>Documents › Hub › Instructies › APP video's</strong></p>
           </div>
           <Button variant="outline" size="sm" onClick={handleDisconnect} className="text-xs border-green-300 text-green-800 hover:bg-green-100">
             <LogOut className="w-3 h-3 mr-1" /> Ontkoppelen
