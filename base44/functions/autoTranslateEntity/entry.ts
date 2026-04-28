@@ -32,10 +32,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { entity_name, entity_id, data, old_data } = await req.json();
+    const body = await req.json();
+    const entity_name = body.entity_name || body.event?.entity_name;
+    const entity_id = body.entity_id || body.event?.entity_id;
+    const data = body.data;
     
-    if (!entity_name || !entity_id) {
-      return Response.json({ error: 'Missing entity_name or entity_id' }, { status: 400 });
+    if (!entity_name || !entity_id || !data) {
+      return Response.json({ error: 'Missing entity_name, entity_id, or data' }, { status: 400 });
     }
 
     // Fields to translate (per entity type)
