@@ -1,6 +1,5 @@
 import { useLanguage } from '@/lib/LanguageContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Globe } from 'lucide-react';
 
 export default function LanguageSwitcher() {
   const { language, changeLanguage } = useLanguage();
@@ -12,9 +11,7 @@ export default function LanguageSwitcher() {
   ];
 
   return (
-    <div className="flex items-center gap-2">
-      <Globe className="w-4 h-4 text-muted-foreground" />
-      <Select value={language} onValueChange={changeLanguage}>
+    <Select value={language} onValueChange={changeLanguage}>
         <SelectTrigger className="w-32 text-xs sm:text-sm">
           <SelectValue />
         </SelectTrigger>
@@ -26,6 +23,5 @@ export default function LanguageSwitcher() {
           ))}
         </SelectContent>
       </Select>
-    </div>
   );
 }
