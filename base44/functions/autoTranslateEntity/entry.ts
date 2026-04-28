@@ -71,13 +71,16 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, message: 'No text to translate' });
     }
 
-    // Prepare text for translation
-    const textStr = Object.entries(textToTranslate)
-      .map(([k, v]) => `[${k}]: ${v}`)
-      .join('\n\n');
+    // Return immediately - translation happens async in background
+    setTimeout(async () => {
+      try {
+        // Prepare text for translation
+        const textStr = Object.entries(textToTranslate)
+          .map(([k, v]) => `[${k}]: ${v}`)
+          .join('\n\n');
 
-    // Use LLM to translate
-    const translationPrompt = `You are a professional translator. Detect the language of the following text and translate it to Dutch, French, and English.
+        // Use LLM to translate
+        const translationPrompt = `You are a professional translator. Detect the language of the following text and translate it to Dutch, French, and English.
 
 SOURCE TEXT (detected language: ${sourceLanguage}):
 ${textStr}
@@ -102,33 +105,33 @@ IMPORTANT:
 - Maintain tone and context
 - Return ONLY valid JSON, no markdown or explanation`;
 
-    const llmResponse = await base44.integrations.Core.InvokeLLM({
-      prompt: translationPrompt,
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          detected_language: { type: 'string' },
-          translations: { type: 'object' }
-        }
+        const llmResponse = await base44.integrations.Core.InvokeLLM({
+          prompt: translationPrompt,
+          response_json_schema: {
+            type: 'object',
+            properties: {
+              detected_language: { type: 'string' },
+              translations: { type: 'object' }
+            }
+          }
+        });
+
+        // Prepare update data
+        const updateData = {};
+        Object.entries(llmResponse.translations || {}).forEach(([field, translations]) => {
+          ['nl', 'fr', 'en'].forEach(lang => {
+            updateData[`${field}_${lang}`] = translations[lang];
+          });
+        });
+
+        // Update entity with translations
+        await base44.asServiceRole.entities[entity_name].update(entity_id, updateData);
+      } catch (err) {
+        console.error('Background translation error:', err);
       }
-    });
+    }, 100);
 
-    // Prepare update data
-    const updateData = {};
-    Object.entries(llmResponse.translations || {}).forEach(([field, translations]) => {
-      ['nl', 'fr', 'en'].forEach(lang => {
-        updateData[`${field}_${lang}`] = translations[lang];
-      });
-    });
-
-    // Update entity with translations
-    await base44.asServiceRole.entities[entity_name].update(entity_id, updateData);
-
-    return Response.json({ 
-      success: true, 
-      detected_language: llmResponse.detected_language,
-      translations_added: Object.keys(updateData).length 
-    });
+    return Response.json({ success: true, message: 'Entity created, translations pending' });
 
   } catch (error) {
     console.error('Translation error:', error);
