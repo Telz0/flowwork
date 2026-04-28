@@ -10,6 +10,7 @@ import { Plus, Pencil, Trash2, X, Check, Loader2, Upload } from 'lucide-react';
 
 export default function ProductenBeheer({ isAdmin }) {
   const queryClient = useQueryClient();
+  const [filterCategory, setFilterCategory] = useState('');
   const [form, setForm] = useState({ name: '', category_id: '', description: '', image_url: '', order: 0, is_active: true });
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -63,8 +64,32 @@ export default function ProductenBeheer({ isAdmin }) {
 
   const catName = (id) => categories.find(c => c.id === id)?.name || id;
 
+  const filteredProducts = filterCategory
+    ? products.filter(p => p.category_id === filterCategory)
+    : products;
+
+  const handleFilterCategory = (val) => {
+    setFilterCategory(val);
+    if (!editing) setForm(f => ({ ...f, category_id: val }));
+  };
+
   return (
-    <div className="grid lg:grid-cols-2 gap-8">
+    <div className="space-y-6">
+      {/* Category filter */}
+      <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+        <Label className="text-sm font-semibold mb-2 block">Filter op categorie</Label>
+        <Select value={filterCategory} onValueChange={handleFilterCategory}>
+          <SelectTrigger className="max-w-sm">
+            <SelectValue placeholder="Alle categorieën" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={null}>Alle categorieën</SelectItem>
+            {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-8">
       <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
         <h2 className="font-bold text-lg mb-5">{editing ? 'Product bewerken' : 'Nieuw product'}</h2>
         <div className="space-y-4">
@@ -113,10 +138,10 @@ export default function ProductenBeheer({ isAdmin }) {
       <div className="space-y-3">
         {isLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-        ) : products.length === 0 ? (
-          <p className="text-muted-foreground text-sm text-center py-8">Nog geen producten.</p>
+        ) : filteredProducts.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center py-8">Geen producten gevonden.</p>
         ) : (
-          products.map(p => (
+          filteredProducts.map(p => (
             <div key={p.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-3 shadow-sm">
               <div className="flex items-center gap-3 min-w-0">
                 {p.image_url && <img src={p.image_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />}
@@ -133,6 +158,7 @@ export default function ProductenBeheer({ isAdmin }) {
           ))
         )}
       </div>
+    </div>
     </div>
   );
 }
