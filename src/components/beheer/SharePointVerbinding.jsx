@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckCircle2, Link2, LogOut, Loader2, AlertCircle, FolderOpen } from 'lucide-react';
 
 const CONNECTOR_ID = "69f08e6060f2243cb70a95b4";
@@ -10,15 +10,30 @@ export default function SharePointVerbinding({ folder, onFolderChange }) {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
+  const [folders, setFolders] = useState([]);
+  const [loadingFolders, setLoadingFolders] = useState(false);
 
   const checkConnection = async () => {
     try {
       const res = await base44.functions.invoke('checkSharePointConnection', {});
-      setConnected(res.data?.connected === true);
+      const isConnected = res.data?.connected === true;
+      setConnected(isConnected);
+      if (isConnected) loadFolders();
     } catch (err) {
       setConnected(false);
     }
     setLoading(false);
+  };
+
+  const loadFolders = async () => {
+    setLoadingFolders(true);
+    try {
+      const res = await base44.functions.invoke('getSharePointFolders', {});
+      setFolders(res.data?.folders || []);
+    } catch (err) {
+      setFolders([]);
+    }
+    setLoadingFolders(false);
   };
 
   useEffect(() => { checkConnection(); }, []);
@@ -76,12 +91,20 @@ export default function SharePointVerbinding({ folder, onFolderChange }) {
           </div>
           <div className="flex items-center gap-2">
             <FolderOpen className="w-4 h-4 text-green-700 flex-shrink-0" />
-            <Input
-              value={folder}
-              onChange={e => onFolderChange(e.target.value)}
-              placeholder="Map bijv. Werkinstructies"
-              className="h-7 text-xs w-44 bg-white border-green-300 focus-visible:ring-green-400"
-            />
+            {loadingFolders ? (
+              <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+            ) : (
+              <Select value={folder} onValueChange={onFolderChange}>
+                <SelectTrigger className="h-7 text-xs w-48 bg-white border-green-300 focus:ring-green-400">
+                  <SelectValue placeholder="Kies een map..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {folders.map(f => (
+                    <SelectItem key={f.id} value={f.name}>{f.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
           <Button variant="outline" size="sm" onClick={handleDisconnect} className="text-xs border-green-300 text-green-800 hover:bg-green-100">
             <LogOut className="w-3 h-3 mr-1" /> Ontkoppelen
