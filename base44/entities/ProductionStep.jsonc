@@ -18,9 +18,13 @@
       "type": "string",
       "description": "URL van de instructievideo"
     },
+    "order_index": {
+      "type": "number",
+      "description": "Volgorde index (100, 200, 300...). Laagste index = eerste stap."
+    },
     "step_number": {
       "type": "number",
-      "description": "Stapnummer / volgorde"
+      "description": "Legacy: oud stapnummer (niet meer gebruikt)"
     },
     "duration_seconds": {
       "type": "number",
@@ -60,6 +64,6 @@
   "required": [
     "product_id",
     "title",
-    "step_number"
+    "order_index"
   ]
 }

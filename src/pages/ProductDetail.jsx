@@ -43,7 +43,7 @@ function StepPlayer({ step }) {
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg flex-shrink-0">
-          {step.step_number}
+          {steps.findIndex(s => s.id === step.id) + 1}
         </div>
         <div>
           <h2 className="text-xl font-extrabold text-foreground">{step.title}</h2>
@@ -128,7 +128,7 @@ export default function ProductDetail() {
 
   const { data: steps = [], isLoading } = useQuery({
     queryKey: ['steps', productId],
-    queryFn: () => base44.entities.ProductionStep.filter({ product_id: productId }, 'step_number'),
+    queryFn: () => base44.entities.ProductionStep.filter({ product_id: productId }, 'order_index'),
     onSuccess: (data) => {
       if (data.length > 0 && !activeStepId) setActiveStepId(data[0].id);
     },
@@ -190,7 +190,7 @@ export default function ProductDetail() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm flex-shrink-0">
-                      {step.step_number}
+                      {steps.findIndex(s => s.id === step.id) + 1}
                     </div>
                     <div className="min-w-0">
                       <p className="font-bold truncate">{step.title}</p>
@@ -226,7 +226,7 @@ export default function ProductDetail() {
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
                       activeStep?.id === step.id ? 'bg-white/20 text-white' : 'bg-secondary text-secondary-foreground'
                     }`}>
-                      {step.step_number}
+                      {steps.findIndex(s => s.id === step.id) + 1}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold truncate text-sm">{step.title}</p>

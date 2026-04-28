@@ -27,7 +27,7 @@ export default function StepDetail() {
 
   const { data: steps = [] } = useQuery({
     queryKey: ['steps', productId],
-    queryFn: () => base44.entities.ProductionStep.filter({ product_id: productId }, 'step_number'),
+    queryFn: () => base44.entities.ProductionStep.filter({ product_id: productId }, 'order_index'),
   });
 
   const currentIndex = steps.findIndex((s) => s.id === stepId);
@@ -89,7 +89,7 @@ export default function StepDetail() {
         <ChevronRight className="w-3 h-3" />
         <button onClick={() => navigate(`/product/${productId}`)} className="hover:text-foreground transition-colors">{product?.name || '...'}</button>
         <ChevronRight className="w-3 h-3" />
-        <span className="text-foreground font-medium">Stap {step.step_number}</span>
+        <span className="text-foreground font-medium">Stap {currentIndex + 1}</span>
       </div>
 
       <Button variant="ghost" onClick={() => navigate(`/product/${productId}`)} className="mb-4 -ml-2 text-muted-foreground hover:text-foreground">
@@ -100,7 +100,7 @@ export default function StepDetail() {
         {/* Header */}
         <div className="flex items-center gap-3 mb-5">
           <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg flex-shrink-0">
-            {step.step_number}
+            {currentIndex + 1}
           </div>
           <div>
             <h1 className="text-2xl font-extrabold text-foreground">{step.title}</h1>

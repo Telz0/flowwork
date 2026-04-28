@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Play, Pause, Volume2, VolumeX, Clock, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function StepVideoCard({ step, isActive, onClick }) {
+export default function StepVideoCard({ step, stepNumber, isActive, onClick }) {
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
   const videoRef = useRef(null);
@@ -47,7 +47,7 @@ export default function StepVideoCard({ step, isActive, onClick }) {
         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
           isActive ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
         }`}>
-          {step.step_number}
+          {stepNumber}
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-foreground truncate">{step.title}</h3>

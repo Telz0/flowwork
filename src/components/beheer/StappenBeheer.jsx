@@ -14,7 +14,7 @@ export default function StappenBeheer({ isAdmin }) {
   const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
-  const [form, setForm] = useState({ product_id: '', title: '', description: '', video_url: '', step_number: 1, duration_seconds: '', tips: '', qc_items: [] });
+  const [form, setForm] = useState({ product_id: '', title: '', description: '', video_url: '', order_index: 100, duration_seconds: '', tips: '', qc_items: [] });
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -32,7 +32,7 @@ export default function StappenBeheer({ isAdmin }) {
   const { data: steps = [], isLoading: loadingSteps } = useQuery({
     queryKey: ['steps', selectedProduct],
     queryFn: () => selectedProduct
-      ? base44.entities.ProductionStep.filter({ product_id: selectedProduct }, 'step_number')
+      ? base44.entities.ProductionStep.filter({ product_id: selectedProduct }, 'order_index')
       : Promise.resolve([]),
     enabled: !!selectedProduct,
   });
@@ -55,21 +55,21 @@ export default function StappenBeheer({ isAdmin }) {
 
   const save = async () => {
     setSaving(true);
-    const data = { ...form, product_id: form.product_id || selectedProduct, duration_seconds: form.duration_seconds ? parseInt(form.duration_seconds) : null };
+    const data = { ...form, product_id: form.product_id || selectedProduct, order_index: parseInt(form.order_index) || 100, duration_seconds: form.duration_seconds ? parseInt(form.duration_seconds) : null };
     if (editing) {
       await base44.entities.ProductionStep.update(editing, data);
     } else {
       await base44.entities.ProductionStep.create(data);
     }
     await queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
-    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: nextStepNumber + 1, duration_seconds: '', tips: '', qc_items: [] });
+    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', order_index: nextOrderIndex, duration_seconds: '', tips: '', qc_items: [] });
     setEditing(null);
     setSaving(false);
   };
 
   const startEdit = (s) => {
     setEditing(s.id);
-    setForm({ product_id: s.product_id, title: s.title, description: s.description || '', video_url: s.video_url || '', step_number: s.step_number, duration_seconds: s.duration_seconds || '', tips: s.tips || '', qc_items: s.qc_items || [] });
+    setForm({ product_id: s.product_id, title: s.title, description: s.description || '', video_url: s.video_url || '', order_index: s.order_index || 100, duration_seconds: s.duration_seconds || '', tips: s.tips || '', qc_items: s.qc_items || [] });
   };
 
   const remove = async (id) => {
@@ -80,23 +80,23 @@ export default function StappenBeheer({ isAdmin }) {
 
   const cancel = () => {
     setEditing(null);
-    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: nextStepNumber, duration_seconds: '', tips: '', qc_items: [] });
+    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', order_index: nextOrderIndex, duration_seconds: '', tips: '', qc_items: [] });
   };
 
   const handleCategorySelect = (val) => {
     setSelectedCategory(val);
     setSelectedProduct('');
     setEditing(null);
-    setForm(f => ({ ...f, product_id: '', step_number: 1 }));
+    setForm(f => ({ ...f, product_id: '', order_index: 100 }));
   };
 
   const handleProductSelect = (val) => {
     setSelectedProduct(val);
-    setForm(f => ({ ...f, product_id: val, step_number: 1 }));
+    setForm(f => ({ ...f, product_id: val, order_index: 100 }));
     setEditing(null);
   };
 
-  const nextStepNumber = steps.length > 0 ? Math.max(...steps.map(s => s.step_number)) + 1 : 1;
+  const nextOrderIndex = steps.length > 0 ? Math.max(...steps.map(s => s.order_index || 0)) + 100 : 100;
 
   const filteredProducts = selectedCategory
     ? products.filter(p => p.category_id === selectedCategory)
@@ -147,12 +147,12 @@ export default function StappenBeheer({ isAdmin }) {
                 <p className="text-sm">Nog geen stappen. Voeg de eerste stap toe.</p>
               </div>
             ) : (
-              steps.map(s => (
+              steps.map((s, idx) => (
                 <div key={s.id} className="bg-card border border-border rounded-xl p-4 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-xs font-bold flex-shrink-0">
-                        {s.step_number}
+                        {idx + 1}
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold truncate">{s.title}</p>
@@ -180,8 +180,8 @@ export default function StappenBeheer({ isAdmin }) {
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs mb-1 block">Stap #</Label>
-                  <Input type="number" min={1} value={editing ? form.step_number : nextStepNumber} onChange={e => setForm(f => ({ ...f, step_number: parseInt(e.target.value) || 1 }))} />
+                  <Label className="text-xs mb-1 block">Volgorde index</Label>
+                  <Input type="number" min={1} step={100} value={form.order_index} onChange={e => setForm(f => ({ ...f, order_index: parseInt(e.target.value) || 100 }))} />
                 </div>
                 <div className="col-span-2">
                   <Label className="text-xs mb-1 block">Titel *</Label>
