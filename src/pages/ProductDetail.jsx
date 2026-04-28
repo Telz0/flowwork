@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Loader2, Film, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX, CheckCircle2, Camera, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Film, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX, CheckCircle2, Camera, ShieldCheck, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import QcFotoGalerij from '@/components/QcFotoGalerij';
@@ -120,6 +120,7 @@ export default function ProductDetail() {
   const { productId } = useParams();
   const navigate = useNavigate();
   const [activeStepId, setActiveStepId] = useState(null);
+  const [lightboxItem, setLightboxItem] = useState(null);
 
   const { data: product } = useQuery({
     queryKey: ['product', productId],
@@ -325,7 +326,11 @@ export default function ProductDetail() {
                   </div>
                   <div className="space-y-3">
                     {allQcItems.map((item, i) => (
-                      <div key={i} className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+                      <button
+                        key={i}
+                        onClick={() => item.photo_url && setLightboxItem(item)}
+                        className={`w-full text-left flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl transition-all ${item.photo_url ? 'hover:border-green-400 hover:bg-green-100 active:scale-[0.99] cursor-pointer' : 'cursor-default'}`}
+                      >
                         <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-green-900 text-sm">{item.label || `Punt ${i + 1}`}</p>
@@ -334,10 +339,22 @@ export default function ProductDetail() {
                         {item.photo_url && (
                           <img src={item.photo_url} alt={item.label} className="w-14 h-14 rounded-lg object-cover border border-green-300 flex-shrink-0" />
                         )}
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </motion.div>
+
+                {/* Lightbox */}
+                {lightboxItem && (
+                  <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4" onClick={() => setLightboxItem(null)}>
+                    <button className="absolute top-4 right-4 w-10 h-10 text-white bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20" onClick={() => setLightboxItem(null)}>
+                      <X className="w-5 h-5" />
+                    </button>
+                    <img src={lightboxItem.photo_url} alt={lightboxItem.label} className="max-w-full max-h-[80vh] rounded-xl object-contain" onClick={e => e.stopPropagation()} />
+                    {lightboxItem.label && <p className="text-white/80 text-sm mt-3 font-medium">{lightboxItem.label}</p>}
+                    {lightboxItem.stepTitle && <p className="text-white/50 text-xs mt-1">Stap: {lightboxItem.stepTitle}</p>}
+                  </div>
+                )}
               ) : (
                 activeStep && <StepPlayer key={activeStep.id} step={activeStep} steps={steps} />
               )}
