@@ -1,8 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const CONNECTOR_ID = "69f08e6060f2243cb70a95b4";
-// Vaste uploadlocatie: Documents > Hub > Instructies > APP video's
-const SITE_ID = "abvandbynd.sharepoint.com,e090a3d3-7b56-4f47-b93e-515db3101555,ff72c900-be6c-4287-a5ff-f96bf739b27a";
+// ProcessEngineering site > Shared Documents > Hub > Instructies > APP video's
+const DRIVE_ID = "b!GXYkUdJgSEWtjvc55y8BpegEdUyAk3ZOs0v9NCiwitVlnP9RkxrtToxklc16InGC";
 const FOLDER_PATH = "Hub/Instructies/APP video's";
 
 Deno.serve(async (req) => {
@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
 
     // Start upload sessie via Microsoft Graph
     const sessionRes = await fetch(
-      `https://graph.microsoft.com/v1.0/sites/${SITE_ID}/drive/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
+      `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
       {
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
