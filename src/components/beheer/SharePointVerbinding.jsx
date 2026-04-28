@@ -13,11 +13,10 @@ export default function SharePointVerbinding({ folder, onFolderChange }) {
 
   const checkConnection = async () => {
     try {
-      await base44.functions.invoke('uploadToSharePoint', {});
-      setConnected(true);
+      const res = await base44.functions.invoke('checkSharePointConnection', {});
+      setConnected(res.data?.connected === true);
     } catch (err) {
-      const msg = err?.response?.data?.error || err?.message || '';
-      setConnected(msg.includes('bestand') || msg.includes('file') || msg.includes('folder'));
+      setConnected(false);
     }
     setLoading(false);
   };

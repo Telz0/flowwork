@@ -10,9 +10,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const formData = await req.formData();
-    const file = formData.get('file');
-    const folder = formData.get('folder') || 'Werkinstructies';
+    let file, folder;
+    try {
+      const formData = await req.formData();
+      file = formData.get('file');
+      folder = formData.get('folder') || 'Werkinstructies';
+    } catch {
+      return Response.json({ error: 'Ongeldige form data' }, { status: 400 });
+    }
 
     if (!file) {
       return Response.json({ error: 'Geen bestand ontvangen' }, { status: 400 });
