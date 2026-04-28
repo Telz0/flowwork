@@ -83,5 +83,24 @@ export const translations = {
 };
 
 export const t = (key, language) => {
-  return translations[language]?.[key] || translations.nl[key] || key;
+  // Return Dutch translation first if available, fallback to key
+  const translation = translations[language]?.[key];
+  if (translation) return translation;
+  
+  // Fallback to Dutch if translation missing
+  return translations.nl[key] || key;
+};
+
+export const autoTranslate = async (text, targetLanguage) => {
+  try {
+    const { base44 } = await import('@/api/base44Client');
+    const response = await base44.integrations.Core.InvokeLLM({
+      prompt: `Translate the following text from Dutch to ${targetLanguage === 'en' ? 'English' : 'French'}. Return ONLY the translation, nothing else:\n\n"${text}"`,
+      model: 'gemini_3_flash'
+    });
+    return response;
+  } catch (error) {
+    console.error('Translation error:', error);
+    return text;
+  }
 };
