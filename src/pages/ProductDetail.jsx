@@ -343,24 +343,24 @@ export default function ProductDetail() {
                     ))}
                   </div>
                 </motion.div>
-
-                {/* Lightbox */}
-                {lightboxItem && (
-                  <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4" onClick={() => setLightboxItem(null)}>
-                    <button className="absolute top-4 right-4 w-10 h-10 text-white bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20" onClick={() => setLightboxItem(null)}>
-                      <X className="w-5 h-5" />
-                    </button>
-                    <img src={lightboxItem.photo_url} alt={lightboxItem.label} className="max-w-full max-h-[80vh] rounded-xl object-contain" onClick={e => e.stopPropagation()} />
-                    {lightboxItem.label && <p className="text-white/80 text-sm mt-3 font-medium">{lightboxItem.label}</p>}
-                    {lightboxItem.stepTitle && <p className="text-white/50 text-xs mt-1">Stap: {lightboxItem.stepTitle}</p>}
-                  </div>
-                )}
               ) : (
                 activeStep && <StepPlayer key={activeStep.id} step={activeStep} steps={steps} />
               )}
             </div>
           </div>
         </>
+      )}
+
+      {/* Lightbox */}
+      {lightboxItem && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4" onClick={() => setLightboxItem(null)}>
+          <button className="absolute top-4 right-4 w-10 h-10 text-white bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20" onClick={() => setLightboxItem(null)}>
+            <X className="w-5 h-5" />
+          </button>
+          <img src={lightboxItem.photo_url} alt={lightboxItem.label} className="max-w-full max-h-[80vh] rounded-xl object-contain" onClick={e => e.stopPropagation()} />
+          {lightboxItem.label && <p className="text-white/80 text-sm mt-3 font-medium">{lightboxItem.label}</p>}
+          {lightboxItem.stepTitle && <p className="text-white/50 text-xs mt-1">Stap: {lightboxItem.stepTitle}</p>}
+        </div>
       )}
     </div>
   );
