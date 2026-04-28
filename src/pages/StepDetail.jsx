@@ -113,6 +113,14 @@ export default function StepDetail() {
           </div>
         </div>
 
+        {/* Tips */}
+        {step.tips && (
+          <div className="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mb-5">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-800 leading-relaxed">{step.tips}</p>
+          </div>
+        )}
+
         {/* Video */}
         <div className="rounded-2xl overflow-hidden bg-black aspect-video mb-5 relative">
           {step.video_url ? (
@@ -169,14 +177,6 @@ export default function StepDetail() {
 
         {/* QC Foto's */}
         <QcFotoGalerij qcItems={step.qc_items} photos={step.qc_photo_urls} label={step.qc_label} />
-
-        {/* Tips */}
-        {step.tips && (
-          <div className="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6">
-            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-amber-800 leading-relaxed">{step.tips}</p>
-          </div>
-        )}
 
         {/* Navigation */}
         <div className="flex gap-3 mt-6">
