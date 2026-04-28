@@ -65,7 +65,7 @@ export default function Home() {
             {language === 'nl' ? 'Geen categorieën gevonden' : language === 'fr' ? 'Aucune catégorie trouvée' : 'No categories found'}
           </p>
           <p className="text-sm mt-1">
-            {language === 'nl' ? 'Vraag een beheerder om categorieën toe te voegen.' : language === 'fr' ? 'Demandez à un administrateur d\'ajouter des catégories.' : 'Ask an administrator to add categories.'}
+            {language === 'nl' ? 'Probeer een ander zoekwoord.' : language === 'fr' ? 'Essayez un autre terme de recherche.' : 'Try a different search term.'}
           </p>
         </div>
       ) : (

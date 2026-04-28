@@ -33,7 +33,9 @@ export default function CategoryCard({ category, productCount, onClick }) {
           {getTranslated(category, 'description', language) && (
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{getTranslated(category, 'description', language)}</p>
           )}
-          <p className={`text-xs font-semibold mt-2 ${c.count}`}>{productCount} product{productCount !== 1 ? 'en' : ''}</p>
+          <p className={`text-xs font-semibold mt-2 ${c.count}`}>
+            {productCount} {language === 'nl' ? `product${productCount !== 1 ? 'en' : ''}` : language === 'fr' ? `produit${productCount !== 1 ? 's' : ''}` : `product${productCount !== 1 ? 's' : ''}`}
+          </p>
         </div>
         <ChevronRight className={`w-5 h-5 ${c.text} opacity-0 group-hover:opacity-100 transition-opacity mt-1 flex-shrink-0`} />
       </div>
