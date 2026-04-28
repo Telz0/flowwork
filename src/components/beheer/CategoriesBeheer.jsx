@@ -93,17 +93,17 @@ export default function CategoriesBeheer() {
           <p className="text-muted-foreground text-sm text-center py-8">{language === 'nl' ? 'Nog geen categorieën.' : language === 'fr' ? 'Pas encore de catégories.' : 'No categories yet.'}</p>
         ) : (
           categories.map(cat => (
-            <div key={cat.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between gap-3 shadow-sm">
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="text-xl flex-shrink-0">{cat.icon || '📦'}</span>
+            <div key={cat.id} className="bg-card border border-border rounded-lg p-2 sm:p-3 flex items-center justify-between gap-2 shadow-sm">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-lg flex-shrink-0">{cat.icon || '📦'}</span>
                 <div className="min-w-0">
-                  <p className="font-semibold truncate">{cat.name}</p>
+                  <p className="font-semibold text-sm truncate">{cat.name}</p>
                   {cat.description && <p className="text-xs text-muted-foreground truncate">{cat.description}</p>}
                 </div>
               </div>
-              <div className="flex gap-1 flex-shrink-0">
-                <Button variant="ghost" size="icon" onClick={() => startEdit(cat)}><Pencil className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" onClick={() => remove(cat.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
+              <div className="flex gap-0.5 flex-shrink-0">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => startEdit(cat)}><Pencil className="w-3 h-3" /></Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => remove(cat.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-3 h-3" /></Button>
               </div>
             </div>
           ))
