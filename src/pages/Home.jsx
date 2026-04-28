@@ -6,9 +6,12 @@ import CategoryCard from '@/components/CategoryCard';
 import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/lib/LanguageContext';
+import { t } from '@/lib/translations';
 
 export default function Home() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [search, setSearch] = useState('');
 
   const { data: categories = [], isLoading: loadingCats } = useQuery({
@@ -33,10 +36,10 @@ export default function Home() {
       {/* Hero header */}
       <div className="mb-8">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
-          Werkinstructies
+          {language === 'nl' ? 'Werkinstructies' : language === 'fr' ? 'Instructions de travail' : 'Work Instructions'}
         </h1>
         <p className="text-muted-foreground mt-2 text-base">
-          Kies een categorie om de stap-voor-stap instructievideo's te bekijken.
+          {language === 'nl' ? 'Kies een categorie om de stap-voor-stap instructievideo\'s te bekijken.' : language === 'fr' ? 'Choisissez une catégorie pour regarder les vidéos d\'instructions étape par étape.' : 'Choose a category to view step-by-step instruction videos.'}
         </p>
       </div>
 
@@ -44,7 +47,7 @@ export default function Home() {
       <div className="relative mb-8 max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
-          placeholder="Zoek categorie..."
+          placeholder={language === 'nl' ? 'Zoek categorie...' : language === 'fr' ? 'Rechercher une catégorie...' : 'Search category...'}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-9 bg-card border-border rounded-xl"
@@ -57,8 +60,12 @@ export default function Home() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-24 text-muted-foreground">
-          <p className="text-lg font-medium">Geen categorieën gevonden</p>
-          <p className="text-sm mt-1">Vraag een beheerder om categorieën toe te voegen.</p>
+          <p className="text-lg font-medium">
+            {language === 'nl' ? 'Geen categorieën gevonden' : language === 'fr' ? 'Aucune catégorie trouvée' : 'No categories found'}
+          </p>
+          <p className="text-sm mt-1">
+            {language === 'nl' ? 'Vraag een beheerder om categorieën toe te voegen.' : language === 'fr' ? 'Demandez à un administrateur d\'ajouter des catégories.' : 'Ask an administrator to add categories.'}
+          </p>
         </div>
       ) : (
         <motion.div
