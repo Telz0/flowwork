@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import QcFotoGalerij from '@/components/QcFotoGalerij';
 import { useRef } from 'react';
 
-function StepPlayer({ step }) {
+function StepPlayer({ step, steps }) {
   const videoRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -255,7 +255,7 @@ export default function ProductDetail() {
 
             {/* Right: stap detail */}
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm min-h-[400px]">
-              {activeStep && <StepPlayer key={activeStep.id} step={activeStep} />}
+              {activeStep && <StepPlayer key={activeStep.id} step={activeStep} steps={steps} />}
             </div>
           </div>
         </>
