@@ -10,6 +10,7 @@ import { Check, Pencil, Trash2, X, Loader2, Upload, Film } from 'lucide-react';
 
 export default function StappenBeheer({ isAdmin }) {
   const queryClient = useQueryClient();
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [form, setForm] = useState({ product_id: '', title: '', description: '', video_url: '', step_number: 1, duration_seconds: '', tips: '' });
   const [editing, setEditing] = useState(null);
@@ -71,25 +72,51 @@ export default function StappenBeheer({ isAdmin }) {
     setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', step_number: (steps.length + 1), duration_seconds: '', tips: '' });
   };
 
+  const handleCategorySelect = (val) => {
+    setSelectedCategory(val);
+    setSelectedProduct('');
+    setEditing(null);
+    setForm(f => ({ ...f, product_id: '', step_number: 1 }));
+  };
+
   const handleProductSelect = (val) => {
     setSelectedProduct(val);
     setForm(f => ({ ...f, product_id: val, step_number: 1 }));
     setEditing(null);
   };
 
+  const filteredProducts = selectedCategory
+    ? products.filter(p => p.category_id === selectedCategory)
+    : products;
+
   return (
     <div className="space-y-6">
-      {/* Product selector */}
+      {/* Category + Product selector */}
       <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
-        <Label className="text-sm font-semibold mb-2 block">Selecteer een product</Label>
-        <Select value={selectedProduct} onValueChange={handleProductSelect}>
-          <SelectTrigger className="max-w-sm">
-            <SelectValue placeholder="Kies product..." />
-          </SelectTrigger>
-          <SelectContent>
-            {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <Label className="text-sm font-semibold mb-2 block">1. Kies een categorie</Label>
+            <Select value={selectedCategory} onValueChange={handleCategorySelect}>
+              <SelectTrigger>
+                <SelectValue placeholder="Kies categorie..." />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex-1">
+            <Label className="text-sm font-semibold mb-2 block">2. Kies een product</Label>
+            <Select value={selectedProduct} onValueChange={handleProductSelect} disabled={!selectedCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder={selectedCategory ? 'Kies product...' : 'Eerst categorie kiezen'} />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       {selectedProduct && (
