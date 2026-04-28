@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Loader2, Film, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Film, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX, CheckCircle2, Camera, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import QcFotoGalerij from '@/components/QcFotoGalerij';
@@ -140,7 +140,16 @@ export default function ProductDetail() {
     enabled: !!product?.category_id,
   });
 
+  const QC_ID = '__qc_summary__';
+
+  // Verzamel alle QC punten over alle stappen
+  const allQcItems = steps.flatMap(step =>
+    (step.qc_items || []).map(item => ({ ...item, stepTitle: step.title }))
+  );
+  const hasQc = allQcItems.length > 0;
+
   const activeStep = steps.find(s => s.id === activeStepId) || steps[0];
+  const isQcActive = activeStepId === QC_ID;
   const activeIndex = steps.findIndex(s => s.id === activeStep?.id);
 
   return (
@@ -205,6 +214,24 @@ export default function ProductDetail() {
                   </div>
                 </button>
               ))}
+              {/* QC Samenvatting knop */}
+              {hasQc && (
+                <button
+                  onClick={() => navigate(`/product/${productId}/stap/${QC_ID}`)}
+                  className="text-left bg-green-50 border-2 border-green-200 hover:border-green-400 rounded-2xl p-4 shadow-sm transition-all active:scale-95 sm:col-span-2"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center flex-shrink-0">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-green-900">QC</p>
+                      <p className="text-xs text-green-700 mt-0.5">{allQcItems.length} controlepunt{allQcItems.length !== 1 ? 'en' : ''} over alle stappen</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-green-600 ml-auto flex-shrink-0" />
+                  </div>
+                </button>
+              )}
             </div>
           </div>
 
@@ -217,21 +244,21 @@ export default function ProductDetail() {
                   key={step.id}
                   onClick={() => setActiveStepId(step.id)}
                   className={`w-full text-left rounded-xl px-4 py-3 transition-all border-2 ${
-                    activeStep?.id === step.id
+                    !isQcActive && activeStep?.id === step.id
                       ? 'bg-primary text-primary-foreground border-primary shadow-md'
                       : 'bg-card border-border hover:border-primary/40 text-foreground'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                      activeStep?.id === step.id ? 'bg-white/20 text-white' : 'bg-secondary text-secondary-foreground'
+                      !isQcActive && activeStep?.id === step.id ? 'bg-white/20 text-white' : 'bg-secondary text-secondary-foreground'
                     }`}>
                       {steps.findIndex(s => s.id === step.id) + 1}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold truncate text-sm">{step.title}</p>
                       {step.duration_seconds && (
-                        <p className={`text-xs flex items-center gap-1 mt-0.5 ${activeStep?.id === step.id ? 'text-white/70' : 'text-muted-foreground'}`}>
+                        <p className={`text-xs flex items-center gap-1 mt-0.5 ${!isQcActive && activeStep?.id === step.id ? 'text-white/70' : 'text-muted-foreground'}`}>
                           <Clock className="w-3 h-3" />
                           {Math.floor(step.duration_seconds / 60)}:{String(step.duration_seconds % 60).padStart(2, '0')}
                         </p>
@@ -241,21 +268,79 @@ export default function ProductDetail() {
                 </button>
               ))}
 
+              {/* QC Samenvatting knop */}
+              {hasQc && (
+                <button
+                  onClick={() => setActiveStepId(QC_ID)}
+                  className={`w-full text-left rounded-xl px-4 py-3 transition-all border-2 ${
+                    isQcActive
+                      ? 'bg-green-600 text-white border-green-600 shadow-md'
+                      : 'bg-green-50 border-green-200 hover:border-green-400 text-green-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${isQcActive ? 'bg-white/20' : 'bg-green-100'}`}>
+                      <ShieldCheck className={`w-4 h-4 ${isQcActive ? 'text-white' : 'text-green-600'}`} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-sm">QC</p>
+                      <p className={`text-xs mt-0.5 ${isQcActive ? 'text-white/70' : 'text-green-700'}`}>{allQcItems.length} controlepunt{allQcItems.length !== 1 ? 'en' : ''}</p>
+                    </div>
+                  </div>
+                </button>
+              )}
+
               {/* Vorige / Volgende */}
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1" disabled={activeIndex <= 0} onClick={() => setActiveStepId(steps[activeIndex - 1].id)}>
+                <Button variant="outline" size="sm" className="flex-1" disabled={isQcActive ? false : activeIndex <= 0} onClick={() => {
+                  if (isQcActive) setActiveStepId(steps[steps.length - 1]?.id);
+                  else if (activeIndex > 0) setActiveStepId(steps[activeIndex - 1].id);
+                }}>
                   <ChevronLeft className="w-4 h-4 mr-1" /> Vorige
                 </Button>
-                <Button size="sm" className="flex-1" disabled={activeIndex >= steps.length - 1} onClick={() => setActiveStepId(steps[activeIndex + 1].id)}>
+                <Button size="sm" className="flex-1" disabled={isQcActive || (!hasQc && activeIndex >= steps.length - 1)} onClick={() => {
+                  if (!isQcActive && activeIndex < steps.length - 1) setActiveStepId(steps[activeIndex + 1].id);
+                  else if (!isQcActive && hasQc) setActiveStepId(QC_ID);
+                }}>
                   Volgende <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
-              <p className="text-center text-xs text-muted-foreground">Stap {activeIndex + 1} van {steps.length}</p>
+              <p className="text-center text-xs text-muted-foreground">
+                {isQcActive ? 'QC Samenvatting' : `Stap ${activeIndex + 1} van ${steps.length}`}
+              </p>
             </div>
 
-            {/* Right: stap detail */}
+            {/* Right: stap detail of QC samenvatting */}
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm min-h-[400px]">
-              {activeStep && <StepPlayer key={activeStep.id} step={activeStep} steps={steps} />}
+              {isQcActive ? (
+                <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center flex-shrink-0">
+                      <ShieldCheck className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-extrabold text-foreground">QC Samenvatting</h2>
+                      <p className="text-sm text-muted-foreground mt-0.5">Alle controlepunten voor {product?.name}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {allQcItems.map((item, i) => (
+                      <div key={i} className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-green-900 text-sm">{item.label || `Punt ${i + 1}`}</p>
+                          <p className="text-xs text-green-700 mt-0.5">Stap: {item.stepTitle}</p>
+                        </div>
+                        {item.photo_url && (
+                          <img src={item.photo_url} alt={item.label} className="w-14 h-14 rounded-lg object-cover border border-green-300 flex-shrink-0" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ) : (
+                activeStep && <StepPlayer key={activeStep.id} step={activeStep} steps={steps} />
+              )}
             </div>
           </div>
         </>

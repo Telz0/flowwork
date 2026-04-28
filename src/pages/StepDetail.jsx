@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX, Film } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX, Film, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import QcFotoGalerij from '@/components/QcFotoGalerij';
@@ -30,10 +30,18 @@ export default function StepDetail() {
     queryFn: () => base44.entities.ProductionStep.filter({ product_id: productId }, 'order_index'),
   });
 
+  const QC_ID = '__qc_summary__';
+  const isQcPage = stepId === QC_ID;
+
+  const allQcItems = steps.flatMap(step =>
+    (step.qc_items || []).map(item => ({ ...item, stepTitle: step.title }))
+  );
+
   const currentIndex = steps.findIndex((s) => s.id === stepId);
   const step = steps[currentIndex];
   const prevStep = steps[currentIndex - 1];
   const nextStep = steps[currentIndex + 1];
+  const hasQc = allQcItems.length > 0;
 
   const goToStep = (s) => {
     setPlaying(false);
@@ -70,6 +78,53 @@ export default function StepDetail() {
     if (!sec) return null;
     return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
   };
+
+  if (isQcPage) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 flex-wrap">
+          <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Categorieën</button>
+          <ChevronRight className="w-3 h-3" />
+          <button onClick={() => navigate(`/categorie/${product?.category_id}`)} className="hover:text-foreground transition-colors">{category?.name || '...'}</button>
+          <ChevronRight className="w-3 h-3" />
+          <button onClick={() => navigate(`/product/${productId}`)} className="hover:text-foreground transition-colors">{product?.name || '...'}</button>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-foreground font-medium">QC</span>
+        </div>
+        <Button variant="ghost" onClick={() => navigate(`/product/${productId}`)} className="mb-4 -ml-2 text-muted-foreground hover:text-foreground">
+          <ChevronLeft className="w-4 h-4 mr-1" /> Terug naar stappen
+        </Button>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-extrabold text-foreground">QC Samenvatting</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Alle controlepunten voor {product?.name}</p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            {allQcItems.map((item, i) => (
+              <div key={i} className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-green-900 text-sm">{item.label || `Punt ${i + 1}`}</p>
+                  <p className="text-xs text-green-700 mt-0.5">Stap: {item.stepTitle}</p>
+                </div>
+                {item.photo_url && (
+                  <img src={item.photo_url} alt={item.label} className="w-14 h-14 rounded-lg object-cover border border-green-300 flex-shrink-0" />
+                )}
+              </div>
+            ))}
+          </div>
+          <Button variant="outline" onClick={() => navigate(`/product/${productId}`)} className="mt-6 w-full">
+            <ChevronLeft className="w-4 h-4 mr-1" /> Terug naar stappen
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (!step) {
     return (
@@ -189,14 +244,19 @@ export default function StepDetail() {
             <ChevronLeft className="w-4 h-4 mr-1" />
             Vorige stap
           </Button>
-          <Button
-            onClick={() => goToStep(nextStep)}
-            disabled={!nextStep}
-            className="flex-1"
-          >
-            Volgende stap
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
+          {nextStep ? (
+            <Button onClick={() => goToStep(nextStep)} className="flex-1">
+              Volgende stap
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          ) : hasQc ? (
+            <Button
+              onClick={() => navigate(`/product/${productId}/stap/${QC_ID}`)}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            >
+              QC <ShieldCheck className="w-4 h-4 ml-1" />
+            </Button>
+          ) : null}
         </div>
 
         {/* Step counter */}
