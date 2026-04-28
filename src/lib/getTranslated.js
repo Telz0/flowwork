@@ -8,15 +8,20 @@
 export const getTranslated = (item, fieldName, language = 'nl') => {
   if (!item) return '';
   
-  // Try language-specific field first
+  // Priority 1: Check if language-specific fields exist with data
   const langField = `${fieldName}_${language}`;
-  if (item[langField]) return item[langField];
-  
-  // Fallback to Dutch
   const nlField = `${fieldName}_nl`;
-  if (item[nlField]) return item[nlField];
+  const frField = `${fieldName}_fr`;
+  const enField = `${fieldName}_en`;
   
-  // Fallback to generic field (for backward compatibility)
+  // If ANY language-specific field has data, use that system
+  if (item[langField] || item[nlField] || item[frField] || item[enField]) {
+    if (item[langField]) return item[langField];
+    if (item[nlField]) return item[nlField]; // fallback to Dutch
+    return '';
+  }
+  
+  // Priority 2: Fallback to generic field (backward compatibility for old data)
   if (item[fieldName]) return item[fieldName];
   
   return '';
