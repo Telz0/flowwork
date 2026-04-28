@@ -13,8 +13,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const formData = await req.formData();
-    const file = formData.get('file');
+    const contentType = req.headers.get('content-type') || '';
+    let file;
+    if (contentType.includes('multipart/form-data') || contentType.includes('application/x-www-form-urlencoded')) {
+      const formData = await req.formData();
+      // SDK kan bestand als 'file' sturen, of als een ander veld
+      file = formData.get('file');
+      if (!file) {
+        // Zoek het eerste File-object in alle velden
+        for (const [, val] of formData.entries()) {
+          if (val instanceof File) { file = val; break; }
+        }
+      }
+    } else {
+      // JSON body - bestand kan niet direct meegestuurd worden
+      return Response.json({ error: 'Verwacht multipart/form-data' }, { status: 400 });
+    }
     if (!file) {
       return Response.json({ error: 'Geen bestand ontvangen' }, { status: 400 });
     }

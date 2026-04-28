@@ -40,13 +40,11 @@ export default function StappenBeheer({ isAdmin }) {
   const uploadVideo = async (file) => {
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await base44.functions.invoke('uploadToSharePoint', formData);
+      // SDK stuurt automatisch als multipart/form-data wanneer een File object meegegeven wordt
+      const res = await base44.functions.invoke('uploadToSharePoint', { file });
       setForm(f => ({ ...f, video_url: res.data.file_url }));
     } catch (err) {
-      // Fallback to Base44 storage if SharePoint not connected
+      // Fallback naar Base44 storage als SharePoint niet verbonden is
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setForm(f => ({ ...f, video_url: file_url }));
     }
