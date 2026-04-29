@@ -117,8 +117,12 @@ IMPORTANT:
           }
         });
 
-        // Prepare update data
+        // Prepare update data — include original source fields to satisfy required field validation
         const updateData = {};
+        // Always carry over the original source fields
+        fields.forEach(field => {
+          if (data[field] != null) updateData[field] = data[field];
+        });
         Object.entries(llmResponse.translations || {}).forEach(([field, translations]) => {
           ['nl', 'fr', 'en'].forEach(lang => {
             updateData[`${field}_${lang}`] = translations[lang];
