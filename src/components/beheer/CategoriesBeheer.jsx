@@ -22,19 +22,22 @@ export default function CategoriesBeheer() {
 
   const save = async () => {
     setSaving(true);
-    let savedId = editing;
-    if (editing) {
-      await base44.entities.Category.update(editing, form);
-    } else {
-      const created = await base44.entities.Category.create(form);
-      savedId = created.id;
+    try {
+      let savedId = editing;
+      if (editing) {
+        await base44.entities.Category.update(editing, form);
+      } else {
+        const created = await base44.entities.Category.create(form);
+        savedId = created.id;
+      }
+      setForm({ name: '', description: '', icon: '📦', order: 0 });
+      setEditing(null);
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      // Automatisch vertalen op de achtergrond
+      base44.functions.invoke('autoTranslateEntity', { entity_name: 'Category', entity_id: savedId });
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-    setForm({ name: '', description: '', icon: '📦', order: 0 });
-    setEditing(null);
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
-    // Automatisch vertalen op de achtergrond
-    base44.functions.invoke('autoTranslateEntity', { entity_type: 'Category', entity_id: savedId });
   };
 
   const startEdit = (cat) => {

@@ -37,19 +37,22 @@ export default function ProductenBeheer({ isAdmin }) {
 
   const save = async () => {
     setSaving(true);
-    let savedId = editing;
-    if (editing) {
-      await base44.entities.Product.update(editing, form);
-    } else {
-      const created = await base44.entities.Product.create(form);
-      savedId = created.id;
+    try {
+      let savedId = editing;
+      if (editing) {
+        await base44.entities.Product.update(editing, form);
+      } else {
+        const created = await base44.entities.Product.create(form);
+        savedId = created.id;
+      }
+      setForm({ name: '', category_id: '', description: '', image_url: '', order: 0, is_active: true });
+      setEditing(null);
+      queryClient.invalidateQueries({ queryKey: ['products-all'] });
+      // Automatisch vertalen op de achtergrond
+      base44.functions.invoke('autoTranslateEntity', { entity_name: 'Product', entity_id: savedId });
+    } finally {
+      setSaving(false);
     }
-    queryClient.invalidateQueries({ queryKey: ['products-all'] });
-    setForm({ name: '', category_id: '', description: '', image_url: '', order: 0, is_active: true });
-    setEditing(null);
-    setSaving(false);
-    // Automatisch vertalen op de achtergrond
-    base44.functions.invoke('autoTranslateEntity', { entity_type: 'Product', entity_id: savedId });
   };
 
   const startEdit = (p) => {
