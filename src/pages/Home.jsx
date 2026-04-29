@@ -16,16 +16,16 @@ export default function Home() {
 
   const { data: categories = [], isLoading: loadingCats } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => base44.entities.Category.list('order', 50),
+    queryFn: () => base44.entities.Category.list('order', 50)
   });
 
   const { data: products = [] } = useQuery({
     queryKey: ['products-all'],
-    queryFn: () => base44.entities.Product.filter({ is_active: true }),
+    queryFn: () => base44.entities.Product.filter({ is_active: true })
   });
 
   const productCountForCategory = (catId) =>
-    products.filter((p) => p.category_id === catId).length;
+  products.filter((p) => p.category_id === catId).length;
 
   const filtered = categories.filter((c) => {
     const translatedName = getTranslated(c, 'name', language);
@@ -50,46 +50,46 @@ export default function Home() {
         <Input
           placeholder={language === 'nl' ? 'Zoek categorie...' : language === 'fr' ? 'Rechercher une catégorie...' : 'Search category...'}
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-card border-border rounded-xl"
-        />
+          onChange={(e) => setSearch(e.target.value)} className="flex h-9 w-full border px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-9 bg-card border-border rounded-xl hidden" />
+
+        
       </div>
 
-      {loadingCats ? (
-        <div className="flex items-center justify-center py-24">
+      {loadingCats ?
+      <div className="flex items-center justify-center py-24">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-24 text-muted-foreground">
+        </div> :
+      filtered.length === 0 ?
+      <div className="text-center py-24 text-muted-foreground">
           <p className="text-lg font-medium">
             {language === 'nl' ? 'Geen categorieën gevonden' : language === 'fr' ? 'Aucune catégorie trouvée' : 'No categories found'}
           </p>
           <p className="text-sm mt-1">
             {language === 'nl' ? 'Probeer een ander zoekwoord.' : language === 'fr' ? 'Essayez un autre terme de recherche.' : 'Try a different search term.'}
           </p>
-        </div>
-      ) : (
+        </div> :
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        
+          {filtered.map((cat, i) =>
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-        >
-          {filtered.map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-            >
+          key={cat.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.06 }}>
+          
               <CategoryCard
-                category={cat}
-                productCount={productCountForCategory(cat.id)}
-                onClick={() => navigate(`/categorie/${cat.id}`)}
-              />
+            category={cat}
+            productCount={productCountForCategory(cat.id)}
+            onClick={() => navigate(`/categorie/${cat.id}`)} />
+          
             </motion.div>
-          ))}
+        )}
         </motion.div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
