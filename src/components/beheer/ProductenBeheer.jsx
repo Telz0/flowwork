@@ -57,7 +57,21 @@ export default function ProductenBeheer({ isAdmin }) {
 
   const startEdit = (p) => {
     setEditing(p.id);
-    setForm({ name: p.name || p.name_nl || '', category_id: p.category_id, description: p.description || p.description_nl || '', image_url: p.image_url || '', order: p.order || 0, is_active: p.is_active !== false });
+    setForm({ 
+      name: p.name || p.name_nl || '', 
+      category_id: p.category_id, 
+      description: p.description || p.description_nl || '', 
+      image_url: p.image_url || '', 
+      order: p.order || 0, 
+      is_active: p.is_active !== false,
+      // Behoud alle bestaande vertalingen
+      name_nl: p.name_nl || '',
+      name_fr: p.name_fr || '',
+      name_en: p.name_en || '',
+      description_nl: p.description_nl || '',
+      description_fr: p.description_fr || '',
+      description_en: p.description_en || ''
+    });
   };
 
   const remove = async (id) => {

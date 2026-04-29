@@ -42,7 +42,20 @@ export default function CategoriesBeheer() {
 
   const startEdit = (cat) => {
     setEditing(cat.id);
-    setForm({ name: cat.name || cat.name_nl || '', description: cat.description || cat.description_nl || '', icon: cat.icon || '📦', order: cat.order || 0 });
+    setForm({ 
+      name: cat.name || cat.name_nl || '', 
+      description: cat.description || cat.description_nl || '', 
+      icon: cat.icon || '📦', 
+      order: cat.order || 0,
+      // Behoud alle bestaande vertalingen
+      name_nl: cat.name_nl || '',
+      name_fr: cat.name_fr || '',
+      name_en: cat.name_en || '',
+      description_nl: cat.description_nl || '',
+      description_fr: cat.description_fr || '',
+      description_en: cat.description_en || '',
+      color: cat.color || ''
+    });
   };
 
   const remove = async (id) => {
