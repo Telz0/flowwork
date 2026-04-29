@@ -4,7 +4,7 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Naam van de categorie (Dutch - deprecated, use name_nl)"
+      "description": "Naam van de categorie (invoertaal - wordt automatisch vertaald)"
     },
     "name_nl": {
       "type": "string",
@@ -20,7 +20,7 @@
     },
     "description": {
       "type": "string",
-      "description": "Omschrijving van de categorie (Dutch - deprecated, use description_nl)"
+      "description": "Omschrijving van de categorie (invoertaal - wordt automatisch vertaald)"
     },
     "description_nl": {
       "type": "string",
@@ -48,6 +48,24 @@
     }
   },
   "required": [
-    "name_nl"
-  ]
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

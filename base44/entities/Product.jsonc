@@ -4,7 +4,7 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Productnaam (Dutch - deprecated, use name_nl)"
+      "description": "Productnaam (invoertaal - wordt automatisch vertaald)"
     },
     "name_nl": {
       "type": "string",
@@ -24,7 +24,7 @@
     },
     "description": {
       "type": "string",
-      "description": "Korte omschrijving van het product (Dutch - deprecated, use description_nl)"
+      "description": "Korte omschrijving van het product (invoertaal - wordt automatisch vertaald)"
     },
     "description_nl": {
       "type": "string",
@@ -53,7 +53,7 @@
     }
   },
   "required": [
-    "name_nl",
+    "name",
     "category_id"
   ]
 }
