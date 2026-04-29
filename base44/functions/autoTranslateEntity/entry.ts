@@ -75,6 +75,8 @@ Deno.serve(async (req) => {
     // Return immediately - translation happens async in background
     setTimeout(async () => {
       try {
+        // Small delay to ensure entity is fully written
+        await new Promise(resolve => setTimeout(resolve, 500));
         // Prepare text for translation
         const textStr = Object.entries(textToTranslate)
           .map(([k, v]) => `[${k}]: ${v}`)
