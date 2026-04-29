@@ -58,9 +58,9 @@ export default function StappenBeheer({ isAdmin }) {
     const savedOrderIndex = parseInt(form.order_index) || 100;
     const data = {
       product_id: form.product_id || selectedProduct,
-      title: form.title,
-      description: form.description,
-      tips: form.tips,
+      title_nl: form.title,
+      description_nl: form.description,
+      tips_nl: form.tips,
       video_url: form.video_url,
       order_index: savedOrderIndex,
       duration_seconds: form.duration_seconds ? parseInt(form.duration_seconds) : null,
