@@ -89,7 +89,7 @@ export default function StappenBeheer({ isAdmin }) {
 
   const startEdit = (s) => {
     setEditing(s.id);
-    setForm({ product_id: s.product_id, title: s.title_nl || s.title || '', description: s.description_nl || s.description || '', video_url: s.video_url || '', order_index: s.order_index || 100, duration_seconds: s.duration_seconds || '', tips: s.tips_nl || s.tips || '', qc_items: s.qc_items || [] });
+    setForm({ product_id: s.product_id, title: s.title || '', description: s.description || '', video_url: s.video_url || '', order_index: s.order_index || 100, duration_seconds: s.duration_seconds || '', tips: s.tips || '', qc_items: s.qc_items || [] });
   };
 
   const remove = async (id) => {
