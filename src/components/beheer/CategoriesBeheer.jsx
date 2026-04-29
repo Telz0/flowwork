@@ -101,7 +101,8 @@ export default function CategoriesBeheer() {
                   {cat.description && <p className="text-xs text-muted-foreground truncate">{cat.description}</p>}
                 </div>
               </div>
-              <div className="flex gap-0.5 flex-shrink-0">
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">{cat.order ?? 0}</span>
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => startEdit(cat)}><Pencil className="w-3 h-3" /></Button>
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => remove(cat.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-3 h-3" /></Button>
               </div>
