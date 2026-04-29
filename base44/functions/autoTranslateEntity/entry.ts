@@ -33,12 +33,18 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const entity_name = body.entity_name || body.event?.entity_name;
+    // Support both: direct call and entity automation payload
+    const entity_name = body.entity_name || body.event?.entity_name || body.function_args?.entity_name;
     const entity_id = body.entity_id || body.event?.entity_id;
-    const data = body.data;
+    let data = body.data;
     
-    if (!entity_name || !entity_id || !data) {
-      return Response.json({ error: 'Missing entity_name, entity_id, or data' }, { status: 400 });
+    if (!entity_name || !entity_id) {
+      return Response.json({ error: 'Missing entity_name or entity_id' }, { status: 400 });
+    }
+    if (!data) {
+      // Fetch the entity data ourselves if not provided (e.g. when payload_too_large)
+      data = await base44.asServiceRole.entities[entity_name].get(entity_id);
+      if (!data) return Response.json({ error: 'Could not fetch entity data' }, { status: 400 });
     }
 
     // Fields to translate (per entity type)
