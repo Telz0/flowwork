@@ -11,7 +11,7 @@ import { Plus, Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
 export default function CategoriesBeheer() {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({ name: '', description: '', icon: '📦', order: 0 });
+  const [form, setForm] = useState({ name_nl: '', description_nl: '', icon: '📦', order: 0 });
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -28,14 +28,14 @@ export default function CategoriesBeheer() {
       await base44.entities.Category.create(form);
     }
     setSaving(false);
-    setForm({ name: '', description: '', icon: '📦', order: 0 });
+    setForm({ name_nl: '', description_nl: '', icon: '📦', order: 0 });
     setEditing(null);
     queryClient.invalidateQueries({ queryKey: ['categories'] });
   };
 
   const startEdit = (cat) => {
     setEditing(cat.id);
-    setForm({ name: cat.name, description: cat.description || '', icon: cat.icon || '📦', order: cat.order || 0 });
+    setForm({ name_nl: cat.name_nl || cat.name || '', description_nl: cat.description_nl || cat.description || '', icon: cat.icon || '📦', order: cat.order || 0 });
   };
 
   const remove = async (id) => {
@@ -46,7 +46,7 @@ export default function CategoriesBeheer() {
 
   const cancel = () => {
     setEditing(null);
-    setForm({ name: '', description: '', icon: '📦', order: 0 });
+    setForm({ name_nl: '', description_nl: '', icon: '📦', order: 0 });
   };
 
   return (
@@ -62,19 +62,19 @@ export default function CategoriesBeheer() {
             </div>
             <div className="col-span-3">
               <Label className="text-xs mb-0.5 block">{language === 'nl' ? 'Naam *' : language === 'fr' ? 'Nom *' : 'Name *'}</Label>
-              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={language === 'nl' ? 'Categorienaam' : language === 'fr' ? 'Nom de la catégorie' : 'Category name'} />
+              <Input value={form.name_nl} onChange={e => setForm(f => ({ ...f, name_nl: e.target.value }))} placeholder={language === 'nl' ? 'Categorienaam' : language === 'fr' ? 'Nom de la catégorie' : 'Category name'} />
             </div>
           </div>
           <div>
             <Label className="text-xs mb-0.5 block">{language === 'nl' ? 'Omschrijving' : language === 'fr' ? 'Description' : 'Description'}</Label>
-            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} rows={1} />
+            <Textarea value={form.description_nl} onChange={e => setForm(f => ({ ...f, description_nl: e.target.value }))} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} rows={1} />
           </div>
           <div>
             <Label className="text-xs mb-0.5 block">{language === 'nl' ? 'Volgorde' : language === 'fr' ? 'Ordre' : 'Order'}</Label>
             <Input type="number" value={form.order} onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))} />
           </div>
           <div className="flex gap-2">
-            <Button onClick={save} disabled={!form.name || saving} className="flex-1">
+            <Button onClick={save} disabled={!form.name_nl || saving} className="flex-1">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
               {editing ? (language === 'nl' ? 'Opslaan' : language === 'fr' ? 'Enregistrer' : 'Save') : (language === 'nl' ? 'Aanmaken' : language === 'fr' ? 'Créer' : 'Create')}
             </Button>
@@ -97,8 +97,8 @@ export default function CategoriesBeheer() {
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-lg flex-shrink-0">{cat.icon || '📦'}</span>
                 <div className="min-w-0">
-                  <p className="font-semibold text-sm truncate">{cat.name}</p>
-                  {cat.description && <p className="text-xs text-muted-foreground truncate">{cat.description}</p>}
+                  <p className="font-semibold text-sm truncate">{cat.name_nl || cat.name}</p>
+                  {(cat.description_nl || cat.description) && <p className="text-xs text-muted-foreground truncate">{cat.description_nl || cat.description}</p>}
                 </div>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
