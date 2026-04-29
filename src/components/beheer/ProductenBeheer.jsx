@@ -54,9 +54,13 @@ export default function ProductenBeheer({ isAdmin }) {
   };
 
   const remove = async (id) => {
-    if (!confirm(language === 'nl' ? 'Product verwijderen?' : language === 'fr' ? 'Supprimer le produit ?' : 'Delete product?')) return;
+    if (!confirm(language === 'nl' ? 'Product verwijderen? Alle stappen en video\'s worden ook verwijderd.' : language === 'fr' ? 'Supprimer le produit ? Toutes les étapes et vidéos seront également supprimées.' : 'Delete product? All steps and videos will also be deleted.')) return;
+    // Verwijder eerst alle gekoppelde stappen
+    const steps = await base44.entities.ProductionStep.filter({ product_id: id });
+    await Promise.all(steps.map(s => base44.entities.ProductionStep.delete(s.id)));
     await base44.entities.Product.delete(id);
     queryClient.invalidateQueries({ queryKey: ['products-all'] });
+    queryClient.invalidateQueries({ queryKey: ['steps', id] });
   };
 
   const cancel = () => {
