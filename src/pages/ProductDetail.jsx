@@ -159,34 +159,38 @@ export default function ProductDetail() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 flex-wrap">
-        <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">{language === 'nl' ? 'Categorieën' : language === 'fr' ? 'Catégories' : 'Categories'}</button>
-        <ChevronRight className="w-3 h-3" />
-        <button onClick={() => navigate(`/categorie/${product?.category_id}`)} className="hover:text-foreground transition-colors">{getTranslated(category, 'name', language) || '...'}</button>
-        <ChevronRight className="w-3 h-3" />
-        <span className="text-foreground font-medium">{getTranslated(product, 'name', language) || '...'}</span>
-      </div>
-
-      <Button variant="ghost" onClick={() => navigate(`/categorie/${product?.category_id}`)} className="mb-4 -ml-2 text-muted-foreground hover:text-foreground">
-        <ChevronLeft className="w-4 h-4 mr-1" /> {language === 'nl' ? 'Terug naar producten' : language === 'fr' ? 'Retour aux produits' : 'Back to products'}
-      </Button>
-
       {/* Product header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">{getTranslated(product, 'name', language)}</h1>
-        {getTranslated(product, 'description', language) && <p className="text-muted-foreground mt-1">{getTranslated(product, 'description', language)}</p>}
-        <div className="flex items-center gap-3 mt-2 flex-wrap">
-          <span className="inline-block text-sm font-semibold text-primary bg-accent px-3 py-1 rounded-full">
-            {steps.length} {language === 'nl' ? `productiestap${steps.length !== 1 ? 'pen' : ''}` : language === 'fr' ? `étape${steps.length !== 1 ? 's' : ''}` : `production step${steps.length !== 1 ? 's' : ''}`}
-          </span>
+      <div className="bg-card border border-border rounded-2xl p-5 mb-6 shadow-sm">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3 flex-wrap">
+          <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">{language === 'nl' ? 'Categorieën' : language === 'fr' ? 'Catégories' : 'Categories'}</button>
+          <ChevronRight className="w-3 h-3 flex-shrink-0" />
+          <button onClick={() => navigate(`/categorie/${product?.category_id}`)} className="hover:text-foreground transition-colors">{getTranslated(category, 'name', language) || '...'}</button>
+        </div>
+
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-extrabold text-foreground tracking-tight leading-tight">{getTranslated(product, 'name', language)}</h1>
+            {getTranslated(product, 'description', language) && (
+              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{getTranslated(product, 'description', language)}</p>
+            )}
+            <span className="inline-block text-xs font-semibold text-primary bg-accent px-2.5 py-1 rounded-full mt-2">
+              {steps.length} {language === 'nl' ? `stap${steps.length !== 1 ? 'pen' : ''}` : language === 'fr' ? `étape${steps.length !== 1 ? 's' : ''}` : `step${steps.length !== 1 ? 's' : ''}`}
+            </span>
+          </div>
           {steps.length > 0 && (
-            <Button onClick={() => navigate(`/product/${productId}/kijk`)} className="gap-2 bg-primary text-primary-foreground">
+            <Button onClick={() => navigate(`/product/${productId}/kijk`)} className="gap-2 bg-primary text-primary-foreground flex-shrink-0">
               <Tablet className="w-4 h-4" />
-              {language === 'nl' ? 'Kijk-modus' : language === 'fr' ? 'Mode opérateur' : 'Operator mode'}
+              <span className="hidden sm:inline">{language === 'nl' ? 'Kijk-modus' : language === 'fr' ? 'Mode opérateur' : 'Operator mode'}</span>
+              <span className="sm:hidden">{language === 'nl' ? 'Kijk' : language === 'fr' ? 'Voir' : 'View'}</span>
             </Button>
           )}
         </div>
+
+        <button onClick={() => navigate(`/categorie/${product?.category_id}`)} className="mt-3 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+          <ChevronLeft className="w-3.5 h-3.5" />
+          {language === 'nl' ? 'Terug naar producten' : language === 'fr' ? 'Retour aux produits' : 'Back to products'}
+        </button>
       </div>
 
       {isLoading ? (
