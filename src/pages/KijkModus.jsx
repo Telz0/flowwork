@@ -310,18 +310,27 @@ export default function KijkModus() {
           <ChevronLeft className="w-6 h-6" />
           {language === 'nl' ? 'Vorige' : language === 'fr' ? 'Précédent' : 'Previous'}
         </button>
-        <button
-          onClick={goNext}
-          disabled={currentIndex === totalSlides - 1}
-          className={`flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl font-semibold text-base disabled:opacity-30 active:scale-95 transition-transform ${
-            hasQc && currentIndex === steps.length - 1
-              ? 'bg-green-600 text-white'
-              : 'bg-primary text-primary-foreground'
-          }`}
-        >
-          {language === 'nl' ? 'Volgende' : language === 'fr' ? 'Suivant' : 'Next'}
-          <ChevronRight className="w-6 h-6" />
-        </button>
+        {currentIndex === totalSlides - 1 ? (
+          <button
+            onClick={() => navigate(`/product/${productId}`)}
+            className="flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl font-semibold text-base active:scale-95 transition-transform bg-green-600 text-white"
+          >
+            <X className="w-6 h-6" />
+            {language === 'nl' ? 'Afsluiten' : language === 'fr' ? 'Fermer' : 'Exit'}
+          </button>
+        ) : (
+          <button
+            onClick={goNext}
+            className={`flex-1 flex items-center justify-center gap-2 h-14 rounded-2xl font-semibold text-base active:scale-95 transition-transform ${
+              hasQc && currentIndex === steps.length - 1
+                ? 'bg-green-600 text-white'
+                : 'bg-primary text-primary-foreground'
+            }`}
+          >
+            {language === 'nl' ? 'Volgende' : language === 'fr' ? 'Suivant' : 'Next'}
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        )}
       </div>
 
       {/* Lightbox */}
