@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CategoriesBeheer from '@/components/beheer/CategoriesBeheer';
 import ProductenBeheer from '@/components/beheer/ProductenBeheer';
 import StappenBeheer from '@/components/beheer/StappenBeheer';
+import SharePointVerbinding from '@/components/beheer/SharePointVerbinding';
 import { ShieldAlert } from 'lucide-react';
 
 export default function Beheer() {
@@ -35,6 +36,7 @@ export default function Beheer() {
           {isAdmin && <TabsTrigger value="categorieen" className="text-xs sm:text-sm">{language === 'nl' ? 'Categorieën' : language === 'fr' ? 'Catégories' : 'Categories'}</TabsTrigger>}
           <TabsTrigger value="producten" className="text-xs sm:text-sm">{language === 'nl' ? 'Producten' : language === 'fr' ? 'Produits' : 'Products'}</TabsTrigger>
           <TabsTrigger value="stappen" className="text-xs sm:text-sm">{language === 'nl' ? 'Stappen & Video\'s' : language === 'fr' ? 'Étapes & Vidéos' : 'Steps & Videos'}</TabsTrigger>
+          {isAdmin && <TabsTrigger value="connectors" className="text-xs sm:text-sm">Connectors</TabsTrigger>}
         </TabsList>
         {isAdmin && (
           <TabsContent value="categorieen">
@@ -47,6 +49,14 @@ export default function Beheer() {
         <TabsContent value="stappen">
           <StappenBeheer isAdmin={isAdmin} />
         </TabsContent>
+        {isAdmin && (
+          <TabsContent value="connectors">
+            <div className="space-y-4 max-w-2xl">
+              <h2 className="text-base font-semibold text-foreground">{language === 'nl' ? 'Externe verbindingen' : language === 'fr' ? 'Connexions externes' : 'External connections'}</h2>
+              <SharePointVerbinding />
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

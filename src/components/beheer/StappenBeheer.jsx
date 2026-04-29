@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Check, Pencil, Trash2, X, Loader2, Upload, Film } from 'lucide-react';
-import SharePointVerbinding from './SharePointVerbinding';
 import QcFotoUpload from './QcFotoUpload';
 
 export default function StappenBeheer({ isAdmin }) {
@@ -124,9 +123,6 @@ export default function StappenBeheer({ isAdmin }) {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* SharePoint verbinding status */}
-      <SharePointVerbinding />
-
       {/* Category + Product selector */}
       <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-sm">
         <div className="flex flex-col gap-3 sm:gap-4">
