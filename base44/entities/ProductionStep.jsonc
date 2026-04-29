@@ -8,7 +8,7 @@
     },
     "title": {
       "type": "string",
-      "description": "Titel van de stap (Dutch - deprecated, use title_nl)"
+      "description": "Titel van de stap (originele invoertaal)"
     },
     "title_nl": {
       "type": "string",
@@ -24,7 +24,7 @@
     },
     "description": {
       "type": "string",
-      "description": "Uitleg en verduidelijking bij de stap (Dutch - deprecated, use description_nl)"
+      "description": "Uitleg bij de stap (originele invoertaal)"
     },
     "description_nl": {
       "type": "string",
@@ -56,7 +56,7 @@
     },
     "tips": {
       "type": "string",
-      "description": "Extra tips of waarschuwingen (Dutch - deprecated, use tips_nl)"
+      "description": "Tips of waarschuwingen (originele invoertaal)"
     },
     "tips_nl": {
       "type": "string",
@@ -92,7 +92,7 @@
           }
         }
       },
-      "description": "QC controlepunten, elk met een titel en optionele foto"
+      "description": "QC controlepunten"
     },
     "qc_photo_urls": {
       "type": "array",
@@ -108,7 +108,7 @@
   },
   "required": [
     "product_id",
-    "title_nl",
+    "title",
     "order_index"
   ]
 }
