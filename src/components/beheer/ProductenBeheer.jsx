@@ -13,7 +13,7 @@ export default function ProductenBeheer({ isAdmin }) {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
   const [filterCategory, setFilterCategory] = useState('');
-  const [form, setForm] = useState({ name_nl: '', category_id: '', description_nl: '', image_url: '', order: 0, is_active: true });
+  const [form, setForm] = useState({ name: '', category_id: '', description: '', image_url: '', order: 0, is_active: true });
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -37,20 +37,24 @@ export default function ProductenBeheer({ isAdmin }) {
 
   const save = async () => {
     setSaving(true);
+    let savedId = editing;
     if (editing) {
       await base44.entities.Product.update(editing, form);
     } else {
-      await base44.entities.Product.create(form);
+      const created = await base44.entities.Product.create(form);
+      savedId = created.id;
     }
-    await queryClient.invalidateQueries({ queryKey: ['products-all'] });
-    setForm({ name_nl: '', category_id: '', description_nl: '', image_url: '', order: 0, is_active: true });
+    queryClient.invalidateQueries({ queryKey: ['products-all'] });
+    setForm({ name: '', category_id: '', description: '', image_url: '', order: 0, is_active: true });
     setEditing(null);
     setSaving(false);
+    // Automatisch vertalen op de achtergrond
+    base44.functions.invoke('autoTranslateEntity', { entity_type: 'Product', entity_id: savedId });
   };
 
   const startEdit = (p) => {
     setEditing(p.id);
-    setForm({ name_nl: p.name_nl || p.name || '', category_id: p.category_id, description_nl: p.description_nl || p.description || '', image_url: p.image_url || '', order: p.order || 0, is_active: p.is_active !== false });
+    setForm({ name: p.name || p.name_nl || '', category_id: p.category_id, description: p.description || p.description_nl || '', image_url: p.image_url || '', order: p.order || 0, is_active: p.is_active !== false });
   };
 
   const remove = async (id) => {
@@ -65,7 +69,7 @@ export default function ProductenBeheer({ isAdmin }) {
 
   const cancel = () => {
     setEditing(null);
-    setForm({ name_nl: '', category_id: '', description_nl: '', image_url: '', order: 0, is_active: true });
+    setForm({ name: '', category_id: '', description: '', image_url: '', order: 0, is_active: true });
   };
 
   const catName = (id) => {
@@ -107,7 +111,7 @@ export default function ProductenBeheer({ isAdmin }) {
         <div className="space-y-3">
           <div>
             <Label className="text-xs mb-1 block">{language === 'nl' ? 'Naam *' : language === 'fr' ? 'Nom *' : 'Name *'}</Label>
-            <Input value={form.name_nl} onChange={e => setForm(f => ({ ...f, name_nl: e.target.value }))} placeholder={language === 'nl' ? 'Productnaam' : language === 'fr' ? 'Nom du produit' : 'Product name'} />
+            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={language === 'nl' ? 'Productnaam' : language === 'fr' ? 'Nom du produit' : 'Product name'} />
           </div>
           <div>
             <Label className="text-xs mb-1 block">{language === 'nl' ? 'Categorie *' : language === 'fr' ? 'Catégorie *' : 'Category *'}</Label>
@@ -122,7 +126,7 @@ export default function ProductenBeheer({ isAdmin }) {
           </div>
           <div>
             <Label className="text-xs mb-1 block">{language === 'nl' ? 'Omschrijving' : language === 'fr' ? 'Description' : 'Description'}</Label>
-            <Textarea value={form.description_nl} onChange={e => setForm(f => ({ ...f, description_nl: e.target.value }))} rows={2} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} />
+            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} />
           </div>
           <div>
             <Label className="text-xs mb-1 block">{language === 'nl' ? 'Afbeelding' : language === 'fr' ? 'Image' : 'Image'}</Label>
@@ -138,7 +142,7 @@ export default function ProductenBeheer({ isAdmin }) {
             {form.image_url && <img src={form.image_url} alt="" className="mt-2 h-20 w-full object-cover rounded-lg" />}
           </div>
           <div className="flex gap-2">
-            <Button onClick={save} disabled={!form.name_nl || !form.category_id || saving} className="flex-1">
+            <Button onClick={save} disabled={!form.name || !form.category_id || saving} className="flex-1">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Check className="w-4 h-4 mr-2" />}
               {editing ? (language === 'nl' ? 'Opslaan' : language === 'fr' ? 'Enregistrer' : 'Save') : (language === 'nl' ? 'Aanmaken' : language === 'fr' ? 'Créer' : 'Create')}
             </Button>
