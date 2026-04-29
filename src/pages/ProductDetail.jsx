@@ -168,21 +168,18 @@ export default function ProductDetail() {
           <button onClick={() => navigate(`/categorie/${product?.category_id}`)} className="hover:text-foreground transition-colors">{getTranslated(category, 'name', language) || '...'}</button>
         </div>
 
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-extrabold text-foreground tracking-tight leading-tight">{getTranslated(product, 'name', language)}</h1>
-            {getTranslated(product, 'description', language) && (
-              <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{getTranslated(product, 'description', language)}</p>
-            )}
-            <span className="inline-block text-xs font-semibold text-primary bg-accent px-2.5 py-1 rounded-full mt-2">
-              {steps.length} {language === 'nl' ? `stap${steps.length !== 1 ? 'pen' : ''}` : language === 'fr' ? `étape${steps.length !== 1 ? 's' : ''}` : `step${steps.length !== 1 ? 's' : ''}`}
-            </span>
-          </div>
+        <h1 className="text-2xl font-extrabold text-foreground tracking-tight leading-tight">{getTranslated(product, 'name', language)}</h1>
+        {getTranslated(product, 'description', language) && (
+          <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{getTranslated(product, 'description', language)}</p>
+        )}
+        <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
+          <span className="inline-block text-xs font-semibold text-primary bg-accent px-2.5 py-1 rounded-full">
+            {steps.length} {language === 'nl' ? `stap${steps.length !== 1 ? 'pen' : ''}` : language === 'fr' ? `étape${steps.length !== 1 ? 's' : ''}` : `step${steps.length !== 1 ? 's' : ''}`}
+          </span>
           {steps.length > 0 && (
-            <Button onClick={() => navigate(`/product/${productId}/kijk`)} className="gap-2 bg-primary text-primary-foreground flex-shrink-0">
+            <Button onClick={() => navigate(`/product/${productId}/kijk`)} className="gap-2 bg-primary text-primary-foreground">
               <Tablet className="w-4 h-4" />
-              <span className="hidden sm:inline">{language === 'nl' ? 'Kijk-modus' : language === 'fr' ? 'Mode opérateur' : 'Operator mode'}</span>
-              <span className="sm:hidden">{language === 'nl' ? 'Kijk' : language === 'fr' ? 'Voir' : 'View'}</span>
+              {language === 'nl' ? 'Kijk-modus' : language === 'fr' ? 'Mode opérateur' : 'Operator mode'}
             </Button>
           )}
         </div>
