@@ -30,9 +30,7 @@ export default function CategoryCard({ category, productCount, onClick }) {
             {category.icon || '📦'}
           </div>
           <h3 className={`font-bold text-lg ${c.text} truncate`}>{translatedName}</h3>
-          {getTranslated(category, 'description', language) && (
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{getTranslated(category, 'description', language)}</p>
-          )}
+          <p className="text-sm text-muted-foreground mt-1 line-clamp-3 h-[4.5rem]">{getTranslated(category, 'description', language) || ''}</p>
           <p className={`text-xs font-semibold mt-2 ${c.count}`}>
             {productCount} {language === 'nl' ? `product${productCount !== 1 ? 'en' : ''}` : language === 'fr' ? `produit${productCount !== 1 ? 's' : ''}` : `product${productCount !== 1 ? 's' : ''}`}
           </p>
