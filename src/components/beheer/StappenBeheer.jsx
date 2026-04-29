@@ -76,11 +76,14 @@ export default function StappenBeheer({ isAdmin }) {
       const allIndices = steps.map(s => s.order_index || 0).concat([savedOrderIndex]);
       const maxIndex = Math.max(...allIndices);
       const nextIndex = Math.ceil((maxIndex + 1) / 100) * 100;
+      // Reset UI meteen — niet wachten op query refresh
+      setSaving(false);
       setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', order_index: nextIndex, duration_seconds: '', tips: '', qc_items: [] });
       setEditing(null);
       queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
-    } finally {
+    } catch (err) {
       setSaving(false);
+      throw err;
     }
   };
 

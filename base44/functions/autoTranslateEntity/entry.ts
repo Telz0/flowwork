@@ -26,11 +26,6 @@ const detectLanguage = (text) => {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const body = await req.json();
     // Support both: direct call and entity automation payload
@@ -42,8 +37,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing entity_name or entity_id' }, { status: 400 });
     }
     if (!data) {
-      // Fetch the entity data ourselves if not provided (e.g. when payload_too_large)
-      data = await base44.asServiceRole.entities[entity_name].get(entity_id);
+      const records = await base44.asServiceRole.entities[entity_name].filter({ id: entity_id });
+      data = records?.[0];
       if (!data) return Response.json({ error: 'Could not fetch entity data' }, { status: 400 });
     }
 
