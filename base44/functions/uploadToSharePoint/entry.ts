@@ -17,58 +17,55 @@ Deno.serve(async (req) => {
     let file;
     if (contentType.includes('multipart/form-data') || contentType.includes('application/x-www-form-urlencoded')) {
       const formData = await req.formData();
-      // SDK kan bestand als 'file' sturen, of als een ander veld
       file = formData.get('file');
       if (!file) {
-        // Zoek het eerste File-object in alle velden
         for (const [, val] of formData.entries()) {
           if (val instanceof File) { file = val; break; }
         }
       }
     } else {
-      // JSON body - bestand kan niet direct meegestuurd worden
       return Response.json({ error: 'Verwacht multipart/form-data' }, { status: 400 });
     }
     if (!file) {
       return Response.json({ error: 'Geen bestand ontvangen' }, { status: 400 });
     }
 
-    const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
-
     const fileName = file.name || `video_${Date.now()}.mp4`;
     const fileBuffer = await file.arrayBuffer();
 
-    // Start upload sessie via Microsoft Graph
-    const sessionRes = await fetch(
-      `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
-      {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item: { "@microsoft.graph.conflictBehavior": "rename" } })
+    // Upload naar Base44 voor snelle playback (geen auth nodig)
+    const base44Result = await base44.asServiceRole.integrations.Core.UploadFile({ file });
+
+    // Upload ook naar SharePoint voor archivering (op de achtergrond)
+    try {
+      const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
+
+      const sessionRes = await fetch(
+        `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ item: { "@microsoft.graph.conflictBehavior": "rename" } })
+        }
+      );
+      const sessionData = await sessionRes.json();
+      if (sessionData.uploadUrl) {
+        // Fire and forget - wacht niet op SharePoint upload
+        fetch(sessionData.uploadUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Range': `bytes 0-${fileBuffer.byteLength - 1}/${fileBuffer.byteLength}`,
+            'Content-Length': fileBuffer.byteLength.toString(),
+          },
+          body: fileBuffer,
+        }).catch(() => {}); // Negeer fouten in achtergrond upload
       }
-    );
-    const sessionData = await sessionRes.json();
-    if (!sessionData.uploadUrl) {
-      return Response.json({ error: 'Kan upload sessie niet starten', details: sessionData }, { status: 500 });
+    } catch (_) {
+      // SharePoint upload is optioneel, ga door met Base44 URL
     }
 
-    // Upload bestand
-    const uploadRes = await fetch(sessionData.uploadUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Range': `bytes 0-${fileBuffer.byteLength - 1}/${fileBuffer.byteLength}`,
-        'Content-Length': fileBuffer.byteLength.toString(),
-      },
-      body: fileBuffer,
-    });
-
-    if (!uploadRes.ok) {
-      const errText = await uploadRes.text();
-      return Response.json({ error: 'Upload mislukt', details: errText }, { status: 500 });
-    }
-
-    const result = await uploadRes.json();
-    return Response.json({ file_url: result.webUrl, file_name: fileName });
+    // Geef direct de Base44 URL terug (snel, geen auth nodig voor afspelen)
+    return Response.json({ file_url: base44Result.file_url, file_name: fileName });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
