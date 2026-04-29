@@ -146,6 +146,10 @@ export default function ProductenBeheer({ isAdmin }) {
             <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} />
           </div>
           <div>
+            <Label className="text-xs mb-1 block">{language === 'nl' ? 'Index' : language === 'fr' ? 'Indice' : 'Index'}</Label>
+            <Input type="number" value={form.order} onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))} placeholder="0" />
+          </div>
+          <div>
             <Label className="text-xs mb-1 block">{language === 'nl' ? 'Afbeelding' : language === 'fr' ? 'Image' : 'Image'}</Label>
             <div className="flex gap-2">
               <Input value={form.image_url} onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))} placeholder={language === 'nl' ? 'https://... of upload →' : language === 'fr' ? 'https://... ou télécharger →' : 'https://... or upload →'} className="flex-1" />
