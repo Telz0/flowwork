@@ -23,10 +23,11 @@ export default function CategoriesBeheer() {
   const save = async () => {
     setSaving(true);
     let savedId = editing;
+    const payload = { ...form, name_nl: form.name, description_nl: form.description };
     if (editing) {
-      await base44.entities.Category.update(editing, form);
+      await base44.entities.Category.update(editing, payload);
     } else {
-      const created = await base44.entities.Category.create(form);
+      const created = await base44.entities.Category.create(payload);
       savedId = created.id;
     }
     setSaving(false);
