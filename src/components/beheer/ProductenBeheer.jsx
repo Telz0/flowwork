@@ -82,19 +82,22 @@ export default function ProductenBeheer({ isAdmin }) {
     <div className="space-y-4 sm:space-y-6">
       {/* Category filter */}
       <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-sm">
-        <Label className="text-sm font-semibold mb-2 block">{language === 'nl' ? 'Filter op categorie' : language === 'fr' ? 'Filtrer par catégorie' : 'Filter by category'}</Label>
+        <Label className="text-sm font-semibold mb-2 block">{language === 'nl' ? 'Kies een categorie' : language === 'fr' ? 'Choisir une catégorie' : 'Choose a category'}</Label>
         <Select value={filterCategory} onValueChange={handleFilterCategory}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder={language === 'nl' ? 'Alle categorieën' : language === 'fr' ? 'Toutes les catégories' : 'All categories'} />
+            <SelectValue placeholder={language === 'nl' ? 'Kies categorie...' : language === 'fr' ? 'Choisir une catégorie...' : 'Choose category...'} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={null}>Alle categorieën</SelectItem>
-            {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}
+            {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name_nl || c.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 w-full">
+      {!filterCategory && (
+        <p className="text-muted-foreground text-sm text-center py-8">{language === 'nl' ? 'Kies eerst een categorie om producten te zien.' : language === 'fr' ? 'Choisissez d\'abord une catégorie pour voir les produits.' : 'Choose a category first to see products.'}</p>
+      )}
+
+      {filterCategory && <div className="grid lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 w-full">
       <div className="bg-card border border-border rounded-2xl p-3 sm:p-4 shadow-sm order-last lg:order-first min-w-0">
         <h2 className="font-bold text-base sm:text-lg mb-4">{editing ? (language === 'nl' ? 'Product bewerken' : language === 'fr' ? 'Modifier le produit' : 'Edit product') : (language === 'nl' ? 'Nieuw product' : language === 'fr' ? 'Nouveau produit' : 'New product')}</h2>
         <div className="space-y-3">
@@ -155,7 +158,8 @@ export default function ProductenBeheer({ isAdmin }) {
                   <p className="text-xs text-muted-foreground">{catName(p.category_id)}</p>
                 </div>
               </div>
-              <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">{p.order ?? 0}</span>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(p)}><Pencil className="w-3 h-3" /></Button>
                 {isAdmin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => remove(p.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-3 h-3" /></Button>}
               </div>
@@ -163,7 +167,7 @@ export default function ProductenBeheer({ isAdmin }) {
           ))
         )}
       </div>
+    </div>}
     </div>
-    </div>
-  );
-}
+    );
+    }

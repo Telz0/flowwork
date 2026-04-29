@@ -184,7 +184,8 @@ export default function StappenBeheer({ isAdmin }) {
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-1 flex-shrink-0">
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">{s.order_index ?? 0}</span>
                       <Button variant="ghost" size="icon" onClick={() => startEdit(s)}><Pencil className="w-4 h-4" /></Button>
                       {isAdmin && <Button variant="ghost" size="icon" onClick={() => remove(s.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>}
                     </div>
