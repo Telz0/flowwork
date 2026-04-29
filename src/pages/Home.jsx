@@ -47,10 +47,10 @@ export default function Home() {
       {/* Search */}
       <div className="relative mb-8 max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder={language === 'nl' ? 'Zoek categorie...' : language === 'fr' ? 'Rechercher une catégorie...' : 'Search category...'}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)} className="flex h-9 w-full border px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-9 bg-card border-border rounded-xl hidden" />
+        
+
+
+        
 
         
       </div>
