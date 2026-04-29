@@ -56,25 +56,40 @@ export default function StappenBeheer({ isAdmin }) {
   const save = async () => {
     setSaving(true);
     const savedOrderIndex = parseInt(form.order_index) || 100;
-    const data = { ...form, product_id: form.product_id || selectedProduct, order_index: savedOrderIndex, duration_seconds: form.duration_seconds ? parseInt(form.duration_seconds) : null };
-    if (editing) {
-      await base44.entities.ProductionStep.update(editing, data);
-    } else {
-      await base44.entities.ProductionStep.create(data);
+    const data = {
+      product_id: form.product_id || selectedProduct,
+      title_nl: form.title,
+      title: form.title,
+      description_nl: form.description,
+      description: form.description,
+      tips_nl: form.tips,
+      tips: form.tips,
+      video_url: form.video_url,
+      order_index: savedOrderIndex,
+      duration_seconds: form.duration_seconds ? parseInt(form.duration_seconds) : null,
+      qc_items: form.qc_items,
+    };
+    try {
+      if (editing) {
+        await base44.entities.ProductionStep.update(editing, data);
+      } else {
+        await base44.entities.ProductionStep.create(data);
+      }
+      // Bereken volgende index
+      const allIndices = steps.map(s => s.order_index || 0).concat([savedOrderIndex]);
+      const maxIndex = Math.max(...allIndices);
+      const nextIndex = Math.ceil((maxIndex + 1) / 100) * 100;
+      setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', order_index: nextIndex, duration_seconds: '', tips: '', qc_items: [] });
+      setEditing(null);
+      queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
+    } finally {
+      setSaving(false);
     }
-    await queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
-    // Bereken volgende index: hoogste van bestaande stappen + opgeslagen index, afgerond op 100tal
-    const allIndices = steps.map(s => s.order_index || 0).concat([savedOrderIndex]);
-    const maxIndex = Math.max(...allIndices);
-    const nextIndex = Math.ceil((maxIndex + 1) / 100) * 100;
-    setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', order_index: nextIndex, duration_seconds: '', tips: '', qc_items: [] });
-    setEditing(null);
-    setSaving(false);
   };
 
   const startEdit = (s) => {
     setEditing(s.id);
-    setForm({ product_id: s.product_id, title: s.title, description: s.description || '', video_url: s.video_url || '', order_index: s.order_index || 100, duration_seconds: s.duration_seconds || '', tips: s.tips || '', qc_items: s.qc_items || [] });
+    setForm({ product_id: s.product_id, title: s.title_nl || s.title || '', description: s.description_nl || s.description || '', video_url: s.video_url || '', order_index: s.order_index || 100, duration_seconds: s.duration_seconds || '', tips: s.tips_nl || s.tips || '', qc_items: s.qc_items || [] });
   };
 
   const remove = async (id) => {
