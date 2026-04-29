@@ -27,10 +27,10 @@ export default function CategoriesBeheer() {
     } else {
       await base44.entities.Category.create(form);
     }
-    await queryClient.invalidateQueries({ queryKey: ['categories'] });
+    setSaving(false);
     setForm({ name: '', description: '', icon: '📦', order: 0 });
     setEditing(null);
-    setSaving(false);
+    queryClient.invalidateQueries({ queryKey: ['categories'] });
   };
 
   const startEdit = (cat) => {
