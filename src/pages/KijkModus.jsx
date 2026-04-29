@@ -160,7 +160,12 @@ export default function KijkModus() {
               : `${language === 'nl' ? 'Stap' : language === 'fr' ? 'Étape' : 'Step'} ${currentIndex + 1} / ${steps.length}`}
           </p>
         </div>
-        <div className="w-16" /> {/* spacer */}
+        <button
+          onClick={() => navigate(`/product/${productId}`)}
+          className="flex items-center gap-1 text-muted-foreground active:opacity-60 p-1"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Progress dots */}
