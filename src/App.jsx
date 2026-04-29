@@ -12,6 +12,7 @@ import CategoryDetail from '@/pages/CategoryDetail';
 import ProductDetail from '@/pages/ProductDetail';
 import Beheer from '@/pages/Beheer';
 import StepDetail from '@/pages/StepDetail';
+import KijkModus from '@/pages/KijkModus';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -41,6 +42,7 @@ const AuthenticatedApp = () => {
         <Route path="/product/:productId" element={<ProductDetail />} />
         <Route path="/beheer" element={<Beheer />} />
         <Route path="/product/:productId/stap/:stepId" element={<StepDetail />} />
+        <Route path="/product/:productId/kijk" element={<KijkModus />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

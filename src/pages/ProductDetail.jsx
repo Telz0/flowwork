@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Loader2, Film, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX, CheckCircle2, Camera, ShieldCheck, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Film, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX, CheckCircle2, Camera, ShieldCheck, X, Tablet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import QcFotoGalerij from '@/components/QcFotoGalerij';
@@ -176,9 +176,17 @@ export default function ProductDetail() {
       <div className="mb-6">
         <h1 className="text-3xl font-extrabold text-foreground tracking-tight">{getTranslated(product, 'name', language)}</h1>
         {getTranslated(product, 'description', language) && <p className="text-muted-foreground mt-1">{getTranslated(product, 'description', language)}</p>}
-        <span className="inline-block text-sm font-semibold text-primary bg-accent px-3 py-1 rounded-full mt-2">
-          {steps.length} {language === 'nl' ? `productiestap${steps.length !== 1 ? 'pen' : ''}` : language === 'fr' ? `étape${steps.length !== 1 ? 's' : ''}` : `production step${steps.length !== 1 ? 's' : ''}`}
-        </span>
+        <div className="flex items-center gap-3 mt-2 flex-wrap">
+          <span className="inline-block text-sm font-semibold text-primary bg-accent px-3 py-1 rounded-full">
+            {steps.length} {language === 'nl' ? `productiestap${steps.length !== 1 ? 'pen' : ''}` : language === 'fr' ? `étape${steps.length !== 1 ? 's' : ''}` : `production step${steps.length !== 1 ? 's' : ''}`}
+          </span>
+          {steps.length > 0 && (
+            <Button onClick={() => navigate(`/product/${productId}/kijk`)} className="gap-2 bg-primary text-primary-foreground">
+              <Tablet className="w-4 h-4" />
+              {language === 'nl' ? 'Kijk-modus' : language === 'fr' ? 'Mode opérateur' : 'Operator mode'}
+            </Button>
+          )}
+        </div>
       </div>
 
       {isLoading ? (
