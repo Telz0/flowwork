@@ -55,21 +55,37 @@ Deno.serve(async (req) => {
     }
 
     // Detect source language and gather text to translate
+    // Only translate fields that: have a source value AND have at least one missing translation
     let sourceLanguage = 'nl';
     let textToTranslate = {};
+    const old_data = body.old_data || null;
     
     fields.forEach(field => {
       const value = data?.[field] || data?.[`${field}_nl`];
-      if (value && typeof value === 'string') {
-        if (!sourceLanguage || sourceLanguage === 'nl') {
-          sourceLanguage = detectLanguage(value);
+      if (!value || typeof value !== 'string') return;
+
+      // Skip if nothing changed compared to old_data
+      if (old_data) {
+        const oldValue = old_data?.[field] || old_data?.[`${field}_nl`];
+        if (oldValue === value) {
+          // Check if all translations already exist - if so, skip
+          const allTranslationsExist = ['nl', 'fr', 'en'].every(lang => data?.[`${field}_${lang}`]);
+          if (allTranslationsExist) return;
         }
-        textToTranslate[field] = value;
       }
+
+      // Only translate if at least one language is missing
+      const missingLangs = ['nl', 'fr', 'en'].filter(lang => !data?.[`${field}_${lang}`]);
+      if (missingLangs.length === 0) return;
+
+      if (sourceLanguage === 'nl') {
+        sourceLanguage = detectLanguage(value);
+      }
+      textToTranslate[field] = { value, missingLangs };
     });
 
     if (Object.keys(textToTranslate).length === 0) {
-      return Response.json({ success: true, message: 'No text to translate' });
+      return Response.json({ success: true, message: 'No translations needed' });
     }
 
     // Return immediately - translation happens async in background
@@ -77,20 +93,21 @@ Deno.serve(async (req) => {
       try {
         // Small delay to ensure entity is fully written
         await new Promise(resolve => setTimeout(resolve, 200));
-        // Prepare text for translation
+        // Prepare text for translation — only missing languages per field
         const textStr = Object.entries(textToTranslate)
-          .map(([k, v]) => `[${k}]: ${v}`)
+          .map(([k, { value, missingLangs }]) => `[${k}] (translate to: ${missingLangs.join(', ')}): ${value}`)
           .join('\n\n');
 
-        // Use LLM to translate
-        const translationPrompt = `You are a professional translator. Detect the language of the following text and translate it to Dutch, French, and English.
+        const missingLangsSummary = [...new Set(Object.values(textToTranslate).flatMap(t => t.missingLangs))];
 
-SOURCE TEXT (detected language: ${sourceLanguage}):
+        // Use LLM to translate only missing languages
+        const translationPrompt = `You are a professional translator. Translate the following text ONLY into the specified target languages.
+
+SOURCE TEXT (source language: ${sourceLanguage}):
 ${textStr}
 
 Return a JSON object with this exact structure:
 {
-  "detected_language": "nl|fr|en",
   "translations": {
     "field_name": {
       "nl": "Dutch translation",
@@ -101,9 +118,7 @@ Return a JSON object with this exact structure:
 }
 
 IMPORTANT:
-- If source is Dutch: translate to French and English (keep Dutch as-is)
-- If source is French: translate to Dutch and English (keep French as-is)
-- If source is English: translate to Dutch and French (keep English as-is)
+- Only provide translations for the languages listed after "translate to:" for each field
 - Keep technical terms consistent
 - Maintain tone and context
 - Return ONLY valid JSON, no markdown or explanation`;
@@ -113,21 +128,20 @@ IMPORTANT:
           response_json_schema: {
             type: 'object',
             properties: {
-              detected_language: { type: 'string' },
               translations: { type: 'object' }
             }
           }
         });
 
-        // Prepare update data — include original source fields to satisfy required field validation
+        // Prepare update data — only update missing translation fields
         const updateData = {};
-        // Always carry over the original source fields
         fields.forEach(field => {
           if (data[field] != null) updateData[field] = data[field];
         });
         Object.entries(llmResponse.translations || {}).forEach(([field, translations]) => {
-          ['nl', 'fr', 'en'].forEach(lang => {
-            updateData[`${field}_${lang}`] = translations[lang];
+          const missingLangs = textToTranslate[field]?.missingLangs || [];
+          missingLangs.forEach(lang => {
+            if (translations[lang]) updateData[`${field}_${lang}`] = translations[lang];
           });
         });
 
