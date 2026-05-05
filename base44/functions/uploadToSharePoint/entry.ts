@@ -35,37 +35,40 @@ Deno.serve(async (req) => {
 
     // Upload naar Base44 voor snelle playback (geen auth nodig)
     const base44Result = await base44.asServiceRole.integrations.Core.UploadFile({ file });
+    const responseUrl = base44Result.file_url;
 
-    // Upload ook naar SharePoint voor archivering (op de achtergrond)
-    try {
-      const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
-
-      const sessionRes = await fetch(
-        `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ item: { "@microsoft.graph.conflictBehavior": "rename" } })
+    // Stuur direct de URL terug — SharePoint sync loopt op de achtergrond verder
+    const sharepointSync = async () => {
+      try {
+        const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
+        const sessionRes = await fetch(
+          `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
+          {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item: { "@microsoft.graph.conflictBehavior": "rename" } })
+          }
+        );
+        const sessionData = await sessionRes.json();
+        if (sessionData.uploadUrl) {
+          await fetch(sessionData.uploadUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Range': `bytes 0-${fileBuffer.byteLength - 1}/${fileBuffer.byteLength}`,
+              'Content-Length': fileBuffer.byteLength.toString(),
+            },
+            body: fileBuffer,
+          });
         }
-      );
-      const sessionData = await sessionRes.json();
-      if (sessionData.uploadUrl) {
-        // Fire and forget - wacht niet op SharePoint upload
-        fetch(sessionData.uploadUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Range': `bytes 0-${fileBuffer.byteLength - 1}/${fileBuffer.byteLength}`,
-            'Content-Length': fileBuffer.byteLength.toString(),
-          },
-          body: fileBuffer,
-        }).catch(() => {}); // Negeer fouten in achtergrond upload
+      } catch (_) {
+        // SharePoint sync is optioneel, fouten negeren
       }
-    } catch (_) {
-      // SharePoint upload is optioneel, ga door met Base44 URL
-    }
+    };
 
-    // Geef direct de Base44 URL terug (snel, geen auth nodig voor afspelen)
-    return Response.json({ file_url: base44Result.file_url, file_name: fileName });
+    // Start SharePoint sync zonder te wachten
+    sharepointSync();
+
+    return Response.json({ file_url: responseUrl, file_name: fileName });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
