@@ -43,8 +43,8 @@ export default function StappenBeheer({ isAdmin }) {
     try {
       // Stap 1: upload naar Base44 tijdelijke opslag
       const { file_url: tempUrl } = await base44.integrations.Core.UploadFile({ file });
-      // Stap 2: stuur de URL naar de backend, die zet het door naar SharePoint
-      const res = await base44.functions.invoke('uploadToSharePoint', { file_url: tempUrl, file_name: file.name });
+      // Stap 2: stuur de URL + bestandsgrootte naar de backend, die zet het door naar SharePoint
+      const res = await base44.functions.invoke('uploadToSharePoint', { file_url: tempUrl, file_name: file.name, file_size: file.size });
       setForm(f => ({ ...f, video_url: res.data.file_url }));
     } catch (err) {
       console.error('Upload fout:', err);
