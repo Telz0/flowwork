@@ -19,6 +19,7 @@ export default function StappenBeheer({ isAdmin }) {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [pendingVideoUpload, setPendingVideoUpload] = useState(null); // { file, tempUrl, fileName, fileSize }
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -41,11 +42,11 @@ export default function StappenBeheer({ isAdmin }) {
   const uploadVideo = async (file) => {
     setUploading(true);
     try {
-      // Stap 1: upload naar Base44 tijdelijke opslag
+      // Upload naar Base44 tijdelijke opslag (snel)
       const { file_url: tempUrl } = await base44.integrations.Core.UploadFile({ file });
-      // Stap 2: stuur de URL + bestandsgrootte naar de backend, die zet het door naar SharePoint
-      const res = await base44.functions.invoke('uploadToSharePoint', { file_url: tempUrl, file_name: file.name, file_size: file.size });
-      setForm(f => ({ ...f, video_url: res.data.file_url }));
+      // Bewaar de pending upload info — wordt naar SharePoint gestuurd ná het opslaan van de stap
+      setPendingVideoUpload({ tempUrl, fileName: file.name, fileSize: file.size });
+      setForm(f => ({ ...f, video_url: '__pending__' }));
     } catch (err) {
       console.error('Upload fout:', err);
       alert('Upload mislukt: ' + (err.message || 'Onbekende fout'));
@@ -56,28 +57,46 @@ export default function StappenBeheer({ isAdmin }) {
   const save = async () => {
     setSaving(true);
     const savedOrderIndex = parseInt(form.order_index) || 100;
+    const hasPendingVideo = form.video_url === '__pending__' && pendingVideoUpload;
     const data = {
       product_id: form.product_id || selectedProduct,
       title: form.title,
       description: form.description,
       tips: form.tips,
-      video_url: form.video_url,
+      video_url: hasPendingVideo ? '' : form.video_url, // Lege URL totdat achtergrond upload klaar is
       order_index: savedOrderIndex,
       duration_seconds: form.duration_seconds ? parseInt(form.duration_seconds) : null,
       qc_items: form.qc_items,
     };
     try {
+      let savedStep;
       if (editing) {
         await base44.entities.ProductionStep.update(editing, data);
+        savedStep = { id: editing };
       } else {
-        await base44.entities.ProductionStep.create(data);
+        savedStep = await base44.entities.ProductionStep.create(data);
       }
+
+      // Start video upload op de achtergrond (niet awaiten)
+      if (hasPendingVideo) {
+        const { tempUrl, fileName, fileSize } = pendingVideoUpload;
+        base44.functions.invoke('processVideoUpload', {
+          step_id: savedStep.id,
+          file_url: tempUrl,
+          file_name: fileName,
+          file_size: fileSize,
+        }).then(() => {
+          queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
+        }).catch(err => console.error('Achtergrond video upload mislukt:', err));
+      }
+
       // Bereken volgende index
       const allIndices = steps.map(s => s.order_index || 0).concat([savedOrderIndex]);
       const maxIndex = Math.max(...allIndices);
       const nextIndex = Math.ceil((maxIndex + 1) / 100) * 100;
-      // Reset UI meteen — niet wachten op query refresh
+      // Reset UI meteen
       setSaving(false);
+      setPendingVideoUpload(null);
       setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', order_index: nextIndex, duration_seconds: '', tips: '', qc_items: [] });
       setEditing(null);
       queryClient.invalidateQueries({ queryKey: ['steps', selectedProduct] });
@@ -174,11 +193,11 @@ export default function StappenBeheer({ isAdmin }) {
                       <div className="min-w-0">
                         <p className="font-semibold truncate">{s.title}</p>
                         {s.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{s.description}</p>}
-                        {s.video_url && (
+                        {s.video_url ? (
                           <span className="inline-flex items-center gap-1 text-xs text-primary mt-1">
                             <Film className="w-3 h-3" /> {language === 'nl' ? 'Video aanwezig' : language === 'fr' ? 'Vidéo présente' : 'Video attached'}
                           </span>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
@@ -221,9 +240,14 @@ export default function StappenBeheer({ isAdmin }) {
                     <input type="file" accept="video/*" className="hidden" onChange={e => e.target.files[0] && uploadVideo(e.target.files[0])} />
                   </label>
                 </div>
-                {form.video_url && (
+                {form.video_url === '__pending__' ? (
+                  <div className="w-full rounded-lg aspect-video bg-muted flex flex-col items-center justify-center gap-2 text-muted-foreground text-sm">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    <span>{language === 'nl' ? 'Video klaar om te uploaden na opslaan' : language === 'fr' ? 'Vidéo prête à uploader après sauvegarde' : 'Video ready to upload after saving'}</span>
+                  </div>
+                ) : form.video_url ? (
                   <video src={form.video_url} className="w-full rounded-lg aspect-video object-contain bg-black" controls />
-                )}
+                ) : null}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
