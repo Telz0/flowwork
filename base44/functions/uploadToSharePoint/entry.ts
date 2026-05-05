@@ -3,6 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 const CONNECTOR_ID = "69f08e6060f2243cb70a95b4";
 const SITE_URL = "abvandbynd.sharepoint.com";
 const FOLDER_PATH = "APP INSTRUCTION VIDEO'S";
+const CHUNK_SIZE = 10 * 1024 * 1024; // 10MB chunks
 
 Deno.serve(async (req) => {
   try {
@@ -20,13 +21,6 @@ Deno.serve(async (req) => {
     }
 
     const fileName = file_name || `video_${Date.now()}.mp4`;
-
-    // Download het bestand van de tijdelijke URL
-    const fileRes = await fetch(file_url);
-    if (!fileRes.ok) {
-      return Response.json({ error: 'Kon bestand niet downloaden van tijdelijke URL' }, { status: 500 });
-    }
-    const fileBuffer = await fileRes.arrayBuffer();
 
     const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
 
@@ -50,7 +44,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Drive niet gevonden', detail: drive }, { status: 500 });
     }
 
-    // Maak een upload sessie aan
+    // Haal de bestandsgrootte op via HEAD request
+    const headRes = await fetch(file_url, { method: 'HEAD' });
+    const contentLength = parseInt(headRes.headers.get('content-length') || '0');
+
+    // Maak een upload sessie aan in SharePoint
     const sessionRes = await fetch(
       `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
       {
@@ -64,23 +62,71 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Kon geen upload sessie aanmaken', detail: sessionData }, { status: 500 });
     }
 
-    // Upload het bestand in één keer
-    const uploadRes = await fetch(sessionData.uploadUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Range': `bytes 0-${fileBuffer.byteLength - 1}/${fileBuffer.byteLength}`,
-        'Content-Length': fileBuffer.byteLength.toString(),
-      },
-      body: fileBuffer,
-    });
-    const uploadData = await uploadRes.json();
+    const uploadUrl = sessionData.uploadUrl;
 
-    const fileUrl = uploadData.webUrl;
-    if (!fileUrl) {
-      return Response.json({ error: 'Upload geslaagd maar geen URL ontvangen', detail: uploadData }, { status: 500 });
+    // Download het bestand als stream en upload in chunks naar SharePoint
+    const fileRes = await fetch(file_url);
+    if (!fileRes.ok || !fileRes.body) {
+      return Response.json({ error: 'Kon bestand niet downloaden' }, { status: 500 });
     }
 
-    return Response.json({ file_url: fileUrl, file_name: fileName });
+    const reader = fileRes.body.getReader();
+    let offset = 0;
+    let buffer = new Uint8Array(0);
+    let finalUrl = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (value) {
+        // Voeg chunk toe aan buffer
+        const newBuffer = new Uint8Array(buffer.length + value.length);
+        newBuffer.set(buffer);
+        newBuffer.set(value, buffer.length);
+        buffer = newBuffer;
+      }
+
+      // Upload zodra buffer groot genoeg is, of als het de laatste chunk is
+      while (buffer.length >= CHUNK_SIZE || (done && buffer.length > 0)) {
+        const chunkSize = done ? buffer.length : Math.min(CHUNK_SIZE, buffer.length);
+        const chunk = buffer.slice(0, chunkSize);
+        buffer = buffer.slice(chunkSize);
+
+        const totalSize = contentLength || (offset + chunk.length + (done ? 0 : 1));
+        const isLast = done && buffer.length === 0;
+        const end = offset + chunk.length - 1;
+        const total = isLast ? (offset + chunk.length) : '*';
+
+        const uploadRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Range': `bytes ${offset}-${end}/${total}`,
+            'Content-Length': chunk.length.toString(),
+          },
+          body: chunk,
+        });
+
+        if (uploadRes.status === 200 || uploadRes.status === 201) {
+          const data = await uploadRes.json();
+          finalUrl = data.webUrl;
+        } else if (uploadRes.status !== 202) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          return Response.json({ error: 'Upload chunk mislukt', status: uploadRes.status, detail: errData }, { status: 500 });
+        }
+
+        offset += chunk.length;
+
+        if (buffer.length < CHUNK_SIZE && !done) break;
+      }
+
+      if (done) break;
+    }
+
+    if (!finalUrl) {
+      return Response.json({ error: 'Upload voltooid maar geen URL ontvangen' }, { status: 500 });
+    }
+
+    return Response.json({ file_url: finalUrl, file_name: fileName });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
