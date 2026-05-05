@@ -1,7 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const CONNECTOR_ID = "69f08e6060f2243cb70a95b4";
-// Root site: abvandbynd.sharepoint.com > Shared Documents > APP INSTRUCTION VIDEO'S
 const SITE_URL = "abvandbynd.sharepoint.com";
 const FOLDER_PATH = "APP INSTRUCTION VIDEO'S";
 
@@ -13,29 +12,25 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const contentType = req.headers.get('content-type') || '';
-    let file;
-    if (contentType.includes('multipart/form-data') || contentType.includes('application/x-www-form-urlencoded')) {
-      const formData = await req.formData();
-      file = formData.get('file');
-      if (!file) {
-        for (const [, val] of formData.entries()) {
-          if (val instanceof File) { file = val; break; }
-        }
-      }
-    } else {
-      return Response.json({ error: 'Verwacht multipart/form-data' }, { status: 400 });
-    }
-    if (!file) {
-      return Response.json({ error: 'Geen bestand ontvangen' }, { status: 400 });
+    const body = await req.json();
+    const { file_url, file_name } = body;
+
+    if (!file_url) {
+      return Response.json({ error: 'Geen file_url ontvangen' }, { status: 400 });
     }
 
-    const fileName = file.name || `video_${Date.now()}.mp4`;
-    const fileBuffer = await file.arrayBuffer();
+    const fileName = file_name || `video_${Date.now()}.mp4`;
+
+    // Download het bestand van de tijdelijke URL
+    const fileRes = await fetch(file_url);
+    if (!fileRes.ok) {
+      return Response.json({ error: 'Kon bestand niet downloaden van tijdelijke URL' }, { status: 500 });
+    }
+    const fileBuffer = await fileRes.arrayBuffer();
 
     const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
 
-    // Haal de drive ID op van de root site
+    // Haal de site ID op
     const siteRes = await fetch(
       `https://graph.microsoft.com/v1.0/sites/${SITE_URL}:/`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -45,7 +40,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Site niet gevonden', detail: siteData }, { status: 500 });
     }
 
-    // Haal de standaard document library (drive) op van de site
+    // Haal de standaard document library op
     const driveRes = await fetch(
       `https://graph.microsoft.com/v1.0/sites/${siteData.id}/drive`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -69,7 +64,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Kon geen upload sessie aanmaken', detail: sessionData }, { status: 500 });
     }
 
-    // Upload het bestand
+    // Upload het bestand in één keer
     const uploadRes = await fetch(sessionData.uploadUrl, {
       method: 'PUT',
       headers: {
@@ -80,7 +75,6 @@ Deno.serve(async (req) => {
     });
     const uploadData = await uploadRes.json();
 
-    // Haal de publieke webUrl op van het geüploade bestand
     const fileUrl = uploadData.webUrl;
     if (!fileUrl) {
       return Response.json({ error: 'Upload geslaagd maar geen URL ontvangen', detail: uploadData }, { status: 500 });

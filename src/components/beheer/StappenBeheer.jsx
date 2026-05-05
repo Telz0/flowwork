@@ -41,10 +41,14 @@ export default function StappenBeheer({ isAdmin }) {
   const uploadVideo = async (file) => {
     setUploading(true);
     try {
-      const res = await base44.functions.invoke('uploadToSharePoint', { file });
+      // Stap 1: upload naar Base44 tijdelijke opslag
+      const { file_url: tempUrl } = await base44.integrations.Core.UploadFile({ file });
+      // Stap 2: stuur de URL naar de backend, die zet het door naar SharePoint
+      const res = await base44.functions.invoke('uploadToSharePoint', { file_url: tempUrl, file_name: file.name });
       setForm(f => ({ ...f, video_url: res.data.file_url }));
     } catch (err) {
       console.error('Upload fout:', err);
+      alert('Upload mislukt: ' + (err.message || 'Onbekende fout'));
     }
     setUploading(false);
   };
