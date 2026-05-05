@@ -1,9 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const CONNECTOR_ID = "69f08e6060f2243cb70a95b4";
-// ProcessEngineering site > Shared Documents > Hub > Instructies > APP video's
-const DRIVE_ID = "b!GXYkUdJgSEWtjvc55y8BpegEdUyAk3ZOs0v9NCiwitVlnP9RkxrtToxklc16InGC";
-const FOLDER_PATH = "Hub/Instructies/APP video's";
+// Root site: abvandbynd.sharepoint.com > Shared Documents > APP INSTRUCTION VIDEO'S
+const SITE_URL = "abvandbynd.sharepoint.com";
+const FOLDER_PATH = "APP INSTRUCTION VIDEO'S";
 
 Deno.serve(async (req) => {
   try {
@@ -35,9 +35,29 @@ Deno.serve(async (req) => {
 
     const { accessToken } = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
 
+    // Haal de drive ID op van de root site
+    const siteRes = await fetch(
+      `https://graph.microsoft.com/v1.0/sites/${SITE_URL}:/`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    const siteData = await siteRes.json();
+    if (!siteData.id) {
+      return Response.json({ error: 'Site niet gevonden', detail: siteData }, { status: 500 });
+    }
+
+    const drivesRes = await fetch(
+      `https://graph.microsoft.com/v1.0/sites/${siteData.id}/drives`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    const drivesData = await drivesRes.json();
+    const drive = drivesData.value?.find(d => d.name === 'Documents' || d.name === 'Shared Documents' || d.webUrl?.includes('Shared%20Documents'));
+    if (!drive) {
+      return Response.json({ error: 'Drive niet gevonden', detail: drivesData }, { status: 500 });
+    }
+
     // Maak een upload sessie aan
     const sessionRes = await fetch(
-      `https://graph.microsoft.com/v1.0/drives/${DRIVE_ID}/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
+      `https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/${FOLDER_PATH}/${encodeURIComponent(fileName)}:/createUploadSession`,
       {
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
