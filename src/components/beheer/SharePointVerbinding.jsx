@@ -71,7 +71,7 @@ export default function SharePointVerbinding() {
           <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-green-800">SharePoint verbonden</p>
-            <p className="text-xs text-green-700">Video's worden geüpload naar <strong>Documents › Hub › Instructies › APP video's</strong></p>
+            <p className="text-xs text-green-700">Video's worden geüpload naar <strong>Shared Documents › APP INSTRUCTION VIDEO'S</strong></p>
           </div>
           <Button variant="outline" size="sm" onClick={handleDisconnect} className="text-xs border-green-300 text-green-800 hover:bg-green-100">
             <LogOut className="w-3 h-3 mr-1" /> Ontkoppelen

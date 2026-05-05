@@ -45,14 +45,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Site niet gevonden', detail: siteData }, { status: 500 });
     }
 
-    const drivesRes = await fetch(
-      `https://graph.microsoft.com/v1.0/sites/${siteData.id}/drives`,
+    // Haal de standaard document library (drive) op van de site
+    const driveRes = await fetch(
+      `https://graph.microsoft.com/v1.0/sites/${siteData.id}/drive`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
-    const drivesData = await drivesRes.json();
-    const drive = drivesData.value?.find(d => d.name === 'Documents' || d.name === 'Shared Documents' || d.webUrl?.includes('Shared%20Documents'));
-    if (!drive) {
-      return Response.json({ error: 'Drive niet gevonden', detail: drivesData }, { status: 500 });
+    const drive = await driveRes.json();
+    if (!drive.id) {
+      return Response.json({ error: 'Drive niet gevonden', detail: drive }, { status: 500 });
     }
 
     // Maak een upload sessie aan
