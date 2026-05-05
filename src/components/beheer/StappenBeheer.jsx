@@ -152,7 +152,7 @@ export default function StappenBeheer({ isAdmin }) {
       </div>
 
       {selectedProduct && (
-        <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
            {/* Steps list - shown first on mobile/tablet, second on desktop */}
           <div className="space-y-2 order-first lg:order-last">
             {loadingSteps ? (
@@ -192,7 +192,7 @@ export default function StappenBeheer({ isAdmin }) {
           </div>
 
           {/* Form */}
-          <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm order-last lg:order-first">
+          <div className="bg-card border border-border rounded-2xl p-4 shadow-sm order-last lg:order-first w-full min-w-0 overflow-hidden">
            <h2 className="font-bold text-base sm:text-lg mb-4">{editing ? (language === 'nl' ? 'Stap bewerken' : language === 'fr' ? 'Modifier l\'étape' : 'Edit step') : (language === 'nl' ? 'Nieuwe stap' : language === 'fr' ? 'Nouvelle étape' : 'New step')}</h2>
            <div className="space-y-3">
               <div className="grid grid-cols-3 gap-3">
