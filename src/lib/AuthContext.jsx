@@ -16,6 +16,12 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     checkAppState();
+    // Fallback: forceer laadstatus op false na 10 seconden
+    const timeout = setTimeout(() => {
+      setIsLoadingPublicSettings(false);
+      setIsLoadingAuth(false);
+    }, 10000);
+    return () => clearTimeout(timeout);
   }, []);
 
   const checkAppState = async () => {
