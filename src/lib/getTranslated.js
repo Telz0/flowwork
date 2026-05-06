@@ -9,10 +9,8 @@ const isHtml = (str) => str && /<[a-z][\s\S]*>/i.test(str);
 
 /**
  * Get the translated value for a field based on language
- * @param {Object} item - The entity object
- * @param {string} fieldName - The base field name (e.g., 'title', 'name', 'description')
- * @param {string} language - The language code ('nl', 'fr', 'en')
- * @returns {string} The translated value or fallback to Dutch or original field
+ * Falls back to the original field if the translation contains raw HTML tags as text
+ * (which means the LLM translation stripped the HTML formatting).
  */
 export const getTranslated = (item, fieldName, language = 'nl') => {
   if (!item) return '';
@@ -21,24 +19,15 @@ export const getTranslated = (item, fieldName, language = 'nl') => {
   const nlField = `${fieldName}_nl`;
   const originalField = item[fieldName];
 
-  // Priority 1: requested language — but if original has HTML and this doesn't, fall through
-  if (item[langField]) {
-    if (!isHtml(item[langField]) && isHtml(originalField)) {
-      // Translation lost HTML formatting — use original instead
-      return originalField;
-    }
-    return item[langField];
-  }
-  
-  // Priority 2: Dutch fallback
-  if (item[nlField]) {
-    if (!isHtml(item[nlField]) && isHtml(originalField)) {
-      return originalField;
-    }
-    return item[nlField];
-  }
-  
-  // Priority 3: legacy field (translation not yet done)
+  const pick = (val) => {
+    // If the original is HTML but this value is also HTML (properly), use it.
+    // If the original is HTML but this value is plain text (LLM stripped tags), fall back to original.
+    if (isHtml(originalField) && !isHtml(val)) return originalField;
+    return val;
+  };
+
+  if (item[langField]) return pick(item[langField]);
+  if (item[nlField]) return pick(item[nlField]);
   if (originalField) return originalField;
   
   return '';
