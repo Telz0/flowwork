@@ -125,6 +125,7 @@ IMPORTANT:
 
         const llmResponse = await base44.integrations.Core.InvokeLLM({
           prompt: translationPrompt,
+          model: 'gpt_5_mini',
           response_json_schema: {
             type: 'object',
             properties: {

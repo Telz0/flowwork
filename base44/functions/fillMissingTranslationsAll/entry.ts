@@ -88,6 +88,7 @@ Geef een JSON object terug met deze structuur:
 BELANGRIJK:
 - Vul alleen de talen in die na "vertaal naar:" staan
 - Geef ALLEEN geldige JSON terug, geen uitleg`,
+          model: 'gpt_5_mini',
           response_json_schema: {
             type: 'object',
             properties: {
