@@ -224,7 +224,7 @@ export default function StappenBeheer({ isAdmin }) {
               </div>
               <div>
                 <Label className="text-xs mb-1 block">{language === 'nl' ? 'Uitleg / omschrijving' : language === 'fr' ? 'Explication / description' : 'Explanation / description'}</Label>
-                <ReactQuill value={form.description} onChange={val => setForm(f => ({ ...f, description: val }))} modules={quillModules} formats={quillFormats} theme="snow" />
+                <ReactQuill value={form.description} onChange={val => setForm(f => ({ ...f, description: val }))} modules={quillModules} formats={quillFormats} theme="snow" className="[&_.ql-editor]:min-h-[120px] sm:[&_.ql-editor]:min-h-[160px] lg:[&_.ql-editor]:min-h-[200px]" />
               </div>
               <div>
                 <Label className="text-xs mb-1 block">{language === 'nl' ? 'Instructievideo' : language === 'fr' ? 'Vidéo d\'instruction' : 'Instruction video'}</Label>
@@ -249,7 +249,7 @@ export default function StappenBeheer({ isAdmin }) {
               </div>
               <div>
                 <Label className="text-xs mb-1 block">{language === 'nl' ? 'Tips / waarschuwingen' : language === 'fr' ? 'Conseils / avertissements' : 'Tips / warnings'}</Label>
-                <ReactQuill value={form.tips} onChange={val => setForm(f => ({ ...f, tips: val }))} modules={quillModules} formats={quillFormats} theme="snow" />
+                <ReactQuill value={form.tips} onChange={val => setForm(f => ({ ...f, tips: val }))} modules={quillModules} formats={quillFormats} theme="snow" className="[&_.ql-editor]:min-h-[100px] sm:[&_.ql-editor]:min-h-[130px] lg:[&_.ql-editor]:min-h-[160px]" />
               </div>
               <QcFotoUpload
                 qcItems={form.qc_items}
