@@ -188,7 +188,9 @@ export default function KijkModus() {
                 )}
 
                 {/* Video */}
-                <VideoPlayer videoUrl={step.video_url} language={language} />
+                <div className="md:max-w-[50%]">
+                  <VideoPlayer videoUrl={step.video_url} language={language} />
+                </div>
 
                 {/* Description */}
                 {getTranslated(step, 'description', language) && (
