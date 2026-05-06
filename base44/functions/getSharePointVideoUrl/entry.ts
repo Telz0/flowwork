@@ -35,32 +35,48 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Ongeldige video_url' }, { status: 400 });
     }
 
-    // Probeer eerst via publieke share-link (geen authenticatie nodig)
-    // De map staat op "Anyone - doesn't require sign-in"
+    // Haal anoniem token op via de publieke share-link (Anyone-link)
+    // Eerst de share URL aanroepen om een anoniem token te krijgen
     const sharingToken = encodeSharingUrl(FOLDER_SHARE_URL);
-    const publicRes = await fetch(
-      `https://graph.microsoft.com/v1.0/shares/${sharingToken}/driveItem:/children/${encodeURIComponent(fileName)}`,
-      { headers: { Accept: 'application/json' } }
+    const tokenRes = await fetch(
+      `https://graph.microsoft.com/v1.0/shares/${sharingToken}/driveItem`,
+      {
+        headers: {
+          Accept: 'application/json',
+          // Anonieme toegang via shares endpoint
+        }
+      }
     );
 
-    if (publicRes.ok) {
-      const item = await publicRes.json();
-      if (item['@microsoft.graph.downloadUrl']) {
-        return Response.json({ download_url: item['@microsoft.graph.downloadUrl'] });
+    if (tokenRes.ok) {
+      const folderItem = await tokenRes.json();
+      // Nu het bestand zoeken binnen de drive van de share
+      if (folderItem.parentReference?.driveId) {
+        const driveId = folderItem.parentReference.driveId;
+        const fileRes = await fetch(
+          `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${folderItem.id}:/${encodeURIComponent(fileName)}`,
+          { headers: { Accept: 'application/json' } }
+        );
+        if (fileRes.ok) {
+          const fileItem = await fileRes.json();
+          if (fileItem['@microsoft.graph.downloadUrl']) {
+            return Response.json({ download_url: fileItem['@microsoft.graph.downloadUrl'] });
+          }
+        }
       }
     }
 
-    // Fallback: probeer via de user-connector (voor wie verbonden is)
+    // Fallback: gebruik de user-connector
     let accessToken = null;
     try {
       const conn = await base44.asServiceRole.connectors.getCurrentAppUserConnection(CONNECTOR_ID);
       accessToken = conn.accessToken;
     } catch {
-      // Geen verbinding beschikbaar
+      // geen verbinding
     }
 
     if (!accessToken) {
-      return Response.json({ error: 'Video niet beschikbaar. Verbind je SharePoint account in Beheer.' }, { status: 403 });
+      return Response.json({ error: 'Video niet beschikbaar' }, { status: 403 });
     }
 
     const siteRes = await fetch(`https://graph.microsoft.com/v1.0/sites/abvandbynd.sharepoint.com:/`, {
@@ -81,7 +97,7 @@ Deno.serve(async (req) => {
     const item = await itemRes.json();
 
     if (!item['@microsoft.graph.downloadUrl']) {
-      return Response.json({ error: 'Geen download URL beschikbaar', detail: item }, { status: 500 });
+      return Response.json({ error: 'Geen download URL beschikbaar' }, { status: 500 });
     }
 
     return Response.json({ download_url: item['@microsoft.graph.downloadUrl'] });
