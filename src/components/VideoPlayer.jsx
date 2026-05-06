@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
-import { Play, Pause, Maximize, Volume2, VolumeX, Film, Loader2 } from 'lucide-react';
+import { Play, Pause, Maximize, Volume2, VolumeX, Film, Loader2, Link } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+
+const CONNECTOR_ID = "69f08e6060f2243cb70a95b4";
 
 // Detecteer of een URL een SharePoint webUrl is (geen directe stream)
 function isSharePointWebUrl(url) {
@@ -85,12 +87,46 @@ export default function VideoPlayer({ videoUrl, language }) {
     );
   }
 
+  const handleConnect = async () => {
+    const url = await base44.connectors.connectAppUser(CONNECTOR_ID);
+    const popup = window.open(url, "_blank");
+    const timer = setInterval(() => {
+      if (!popup || popup.closed) {
+        clearInterval(timer);
+        // Herlaad de video na verbinden
+        setError(null);
+        setStreamUrl(null);
+        setLoading(true);
+        base44.functions.invoke('getSharePointVideoUrl', { video_url: videoUrl })
+          .then(res => setStreamUrl(res.data.download_url))
+          .catch(err => setError(err.message || 'Kon video URL niet ophalen'))
+          .finally(() => setLoading(false));
+      }
+    }, 500);
+  };
+
   if (error) {
+    const needsConnect = error.includes('No active connection') || error.includes('connection found');
     return (
-      <div className="w-full aspect-video bg-black/80 rounded-2xl flex flex-col items-center justify-center gap-2 text-white/50 px-4 text-center">
+      <div className="w-full aspect-video bg-black/80 rounded-2xl flex flex-col items-center justify-center gap-3 text-white/50 px-4 text-center">
         <Film className="w-10 h-10" />
-        <span className="text-sm">{label('Video niet beschikbaar', 'Vidéo non disponible', 'Video unavailable')}</span>
-        <span className="text-xs opacity-60 break-all">{error}</span>
+        {needsConnect ? (
+          <>
+            <span className="text-sm text-white/70">{label('Verbind uw Microsoft account om video\'s te bekijken', 'Connectez votre compte Microsoft pour voir les vidéos', 'Connect your Microsoft account to view videos')}</span>
+            <button
+              onClick={handleConnect}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium active:opacity-80"
+            >
+              <Link className="w-4 h-4" />
+              {label('Account verbinden', 'Connecter le compte', 'Connect account')}
+            </button>
+          </>
+        ) : (
+          <>
+            <span className="text-sm">{label('Video niet beschikbaar', 'Vidéo non disponible', 'Video unavailable')}</span>
+            <span className="text-xs opacity-60 break-all">{error}</span>
+          </>
+        )}
       </div>
     );
   }
