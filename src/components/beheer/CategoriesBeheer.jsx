@@ -33,8 +33,10 @@ export default function CategoriesBeheer() {
       setForm({ name: '', description: '', icon: '📦', order: 0 });
       setEditing(null);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      // Automatisch vertalen op de achtergrond
-      base44.functions.invoke('autoTranslateEntity', { entity_name: 'Category', entity_id: savedId });
+      // Alleen vertalen bij nieuw record
+      if (!editing) {
+        base44.functions.invoke('autoTranslateEntity', { entity_name: 'Category', entity_id: savedId });
+      }
     } finally {
       setSaving(false);
     }

@@ -67,16 +67,22 @@ export default function StappenBeheer({ isAdmin }) {
       qc_items: form.qc_items,
     };
     try {
+      let savedStepId = editing;
       if (editing) {
         await base44.entities.ProductionStep.update(editing, data);
       } else {
-        await base44.entities.ProductionStep.create(data);
+        const created = await base44.entities.ProductionStep.create(data);
+        savedStepId = created.id;
       }
       // Bereken volgende index
       const allIndices = steps.map(s => s.order_index || 0).concat([savedOrderIndex]);
       const maxIndex = Math.max(...allIndices);
       const nextIndex = Math.ceil((maxIndex + 1) / 100) * 100;
       // Reset UI meteen — niet wachten op query refresh
+      // Alleen vertalen bij nieuw record
+      if (!editing && savedStepId) {
+        base44.functions.invoke('autoTranslateEntity', { entity_name: 'ProductionStep', entity_id: savedStepId });
+      }
       setSaving(false);
       setForm({ product_id: selectedProduct, title: '', description: '', video_url: '', order_index: nextIndex, duration_seconds: '', tips: '', qc_items: [] });
       setEditing(null);

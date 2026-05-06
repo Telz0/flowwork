@@ -49,8 +49,10 @@ export default function ProductenBeheer({ isAdmin }) {
       setForm({ name: '', category_id: '', description: '', image_url: '', order: 0, is_active: true });
       setEditing(null);
       queryClient.invalidateQueries({ queryKey: ['products-all'] });
-      // Automatisch vertalen op de achtergrond
-      base44.functions.invoke('autoTranslateEntity', { entity_name: 'Product', entity_id: savedId });
+      // Alleen vertalen bij nieuw record
+      if (!editing) {
+        base44.functions.invoke('autoTranslateEntity', { entity_name: 'Product', entity_id: savedId });
+      }
     } finally {
       setSaving(false);
     }
