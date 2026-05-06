@@ -43,7 +43,7 @@ function StepPlayer({ step, steps }) {
 
       {/* Description */}
       {getTranslated(step, 'description', language) && (
-        <p className="text-foreground leading-relaxed mb-4">{getTranslated(step, 'description', language)}</p>
+        <div className="prose prose-sm max-w-none text-foreground leading-relaxed mb-4" dangerouslySetInnerHTML={{ __html: getTranslated(step, 'description', language) }} />
       )}
 
       {/* QC Foto's */}
@@ -53,7 +53,7 @@ function StepPlayer({ step, steps }) {
       {getTranslated(step, 'tips', language) && (
         <div className="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
           <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-800 leading-relaxed">{getTranslated(step, 'tips', language)}</p>
+          <div className="text-sm text-amber-800 leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: getTranslated(step, 'tips', language) }} />
         </div>
       )}
     </motion.div>
