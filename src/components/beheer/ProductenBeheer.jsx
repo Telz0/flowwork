@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, X, Check, Loader2, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, Loader2, Upload, Copy } from 'lucide-react';
 
 export default function ProductenBeheer({ isAdmin }) {
   const { language } = useLanguage();
@@ -17,6 +17,7 @@ export default function ProductenBeheer({ isAdmin }) {
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [copying, setCopying] = useState(null); // product id dat gekopieerd wordt
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
@@ -82,6 +83,32 @@ export default function ProductenBeheer({ isAdmin }) {
     await base44.entities.Product.delete(id);
     queryClient.invalidateQueries({ queryKey: ['products-all'] });
     queryClient.invalidateQueries({ queryKey: ['steps', id] });
+  };
+
+  const copyProduct = async (p) => {
+    setCopying(p.id);
+    try {
+      // Kopieer product met naam + '-copy'
+      const { id: _id, created_date, updated_date, created_by, ...productData } = p;
+      const copyName = (productData.name || '') + '-copy';
+      const newProduct = await base44.entities.Product.create({
+        ...productData,
+        name: copyName,
+        name_nl: productData.name_nl ? productData.name_nl + '-copy' : undefined,
+        name_fr: productData.name_fr ? productData.name_fr + '-copy' : undefined,
+        name_en: productData.name_en ? productData.name_en + '-copy' : undefined,
+      });
+
+      // Kopieer alle stappen van het originele product
+      const steps = await base44.entities.ProductionStep.filter({ product_id: p.id }, 'order_index');
+      await Promise.all(steps.map(({ id: _sid, created_date: _cd, updated_date: _ud, created_by: _cb, ...stepData }) =>
+        base44.entities.ProductionStep.create({ ...stepData, product_id: newProduct.id })
+      ));
+
+      queryClient.invalidateQueries({ queryKey: ['products-all'] });
+    } finally {
+      setCopying(null);
+    }
   };
 
   const cancel = () => {
@@ -190,7 +217,10 @@ export default function ProductenBeheer({ isAdmin }) {
               <div className="flex items-center gap-1 flex-shrink-0">
                 <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">{p.order ?? 0}</span>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(p)}><Pencil className="w-3 h-3" /></Button>
-                {isAdmin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => remove(p.id)} className="text-destructive hover:text-destructive"><Trash2 className="w-3 h-3" /></Button>}
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => copyProduct(p)} disabled={!!copying}>
+                  {copying === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Copy className="w-3 h-3" />}
+                </Button>
+                {isAdmin && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => remove(p.id)}><Trash2 className="w-3 h-3" /></Button>}
               </div>
             </div>
           ))
