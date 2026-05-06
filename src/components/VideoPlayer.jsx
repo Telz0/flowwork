@@ -39,7 +39,9 @@ export default function VideoPlayer({ videoUrl, language }) {
           setStreamUrl(res.data.download_url);
         })
         .catch(err => {
-          setError(err.message || 'Kon video URL niet ophalen');
+          // Haal de echte error message op uit de response body
+          const detail = err?.response?.data?.error || err?.response?.data?.detail || err.message || 'Kon video URL niet ophalen';
+          setError(detail);
         })
         .finally(() => setLoading(false));
     } else {
@@ -99,14 +101,17 @@ export default function VideoPlayer({ videoUrl, language }) {
         setLoading(true);
         base44.functions.invoke('getSharePointVideoUrl', { video_url: videoUrl })
           .then(res => setStreamUrl(res.data.download_url))
-          .catch(err => setError(err.message || 'Kon video URL niet ophalen'))
+          .catch(err => {
+            const detail = err?.response?.data?.error || err?.response?.data?.detail || err.message || 'Kon video URL niet ophalen';
+            setError(detail);
+          })
           .finally(() => setLoading(false));
       }
     }, 500);
   };
 
   if (error) {
-    const needsConnect = error.includes('No active connection') || error.includes('connection found');
+    const needsConnect = error.includes('No active connection') || error.includes('connection found') || error.includes('404') || error.includes('500') || error.includes('connector');
     return (
       <div className="w-full aspect-video bg-black/80 rounded-2xl flex flex-col items-center justify-center gap-3 text-white/50 px-4 text-center">
         <Film className="w-10 h-10" />
