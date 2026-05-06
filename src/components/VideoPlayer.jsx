@@ -87,9 +87,10 @@ export default function VideoPlayer({ videoUrl, language }) {
 
   if (error) {
     return (
-      <div className="w-full aspect-video bg-black/80 rounded-2xl flex flex-col items-center justify-center gap-2 text-white/50">
+      <div className="w-full aspect-video bg-black/80 rounded-2xl flex flex-col items-center justify-center gap-2 text-white/50 px-4 text-center">
         <Film className="w-10 h-10" />
         <span className="text-sm">{label('Video niet beschikbaar', 'Vidéo non disponible', 'Video unavailable')}</span>
+        <span className="text-xs opacity-60 break-all">{error}</span>
       </div>
     );
   }

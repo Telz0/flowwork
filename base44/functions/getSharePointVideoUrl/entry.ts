@@ -60,7 +60,13 @@ Deno.serve(async (req) => {
         if (fileRes.ok) {
           const fileItem = await fileRes.json();
           if (fileItem['@microsoft.graph.downloadUrl']) {
-            return Response.json({ download_url: fileItem['@microsoft.graph.downloadUrl'] });
+            // Volg de redirect om de echte stream URL te krijgen (werkt beter op Android)
+            const redirectRes = await fetch(fileItem['@microsoft.graph.downloadUrl'], {
+              method: 'HEAD',
+              redirect: 'follow'
+            });
+            const finalUrl = redirectRes.url || fileItem['@microsoft.graph.downloadUrl'];
+            return Response.json({ download_url: finalUrl });
           }
         }
       }
