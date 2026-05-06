@@ -1,90 +1,12 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Play, Pause, Maximize, Volume2, VolumeX, Film, ShieldCheck, CheckCircle2, AlertTriangle, Clock, X, ZoomIn } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Film, ShieldCheck, CheckCircle2, AlertTriangle, Clock, X, ZoomIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getTranslated } from '@/lib/getTranslated';
-
-function VideoPlayer({ videoUrl, language }) {
-  const videoRef = useRef(null);
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
-
-  useEffect(() => {
-    setPlaying(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-  }, [videoUrl]);
-
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (playing) { videoRef.current.pause(); setPlaying(false); }
-    else { videoRef.current.play(); setPlaying(true); }
-  };
-
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = !muted;
-    setMuted(!muted);
-  };
-
-  const goFullscreen = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (v.webkitEnterFullscreen) { v.webkitEnterFullscreen(); return; }
-    if (v.requestFullscreen) v.requestFullscreen();
-    else if (v.webkitRequestFullscreen) v.webkitRequestFullscreen();
-  };
-
-  if (!videoUrl) {
-    return (
-      <div className="w-full aspect-video bg-black/60 rounded-2xl flex flex-col items-center justify-center gap-3 text-white/30">
-        <Film className="w-16 h-16" />
-        <span className="text-base">{language === 'nl' ? 'Geen video beschikbaar' : language === 'fr' ? 'Aucune vidéo disponible' : 'No video available'}</span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full aspect-video bg-black rounded-2xl overflow-hidden relative">
-      <video
-        ref={videoRef}
-        src={videoUrl}
-        className="w-full h-full object-contain"
-        playsInline
-        webkit-playsinline="true"
-        onEnded={() => setPlaying(false)}
-      />
-      {!playing && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <button
-            onClick={togglePlay}
-            className="w-20 h-20 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-2xl active:scale-95 transition-transform"
-          >
-            <Play className="w-9 h-9 text-primary ml-1" />
-          </button>
-        </div>
-      )}
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-5 py-4 bg-gradient-to-t from-black/80 to-transparent">
-        <button onClick={togglePlay} className="text-white p-2 active:opacity-60">
-          {playing ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7" />}
-        </button>
-        <div className="flex items-center gap-4">
-          <button onClick={toggleMute} className="text-white p-2 active:opacity-60">
-            {muted ? <VolumeX className="w-7 h-7" /> : <Volume2 className="w-7 h-7" />}
-          </button>
-          <button onClick={goFullscreen} className="text-white p-2 active:opacity-60">
-            <Maximize className="w-7 h-7" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+import VideoPlayer from '@/components/VideoPlayer';
 
 export default function KijkModus() {
   const { productId } = useParams();

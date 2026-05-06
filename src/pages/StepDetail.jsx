@@ -1,11 +1,12 @@
-import { useRef, useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ChevronLeft, ChevronRight, Clock, AlertTriangle, Play, Pause, Maximize, Volume2, VolumeX, Film, ShieldCheck, CheckCircle2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, AlertTriangle, Film, ShieldCheck, CheckCircle2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import QcFotoGalerij from '@/components/QcFotoGalerij';
+import VideoPlayer from '@/components/VideoPlayer';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getTranslated } from '@/lib/getTranslated';
 
@@ -13,10 +14,6 @@ export default function StepDetail() {
   const { productId, stepId } = useParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const videoRef = useRef(null);
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
-
   const { data: product } = useQuery({
     queryKey: ['product', productId],
     queryFn: () => base44.entities.Product.filter({ id: productId }).then((r) => r[0]),
@@ -46,36 +43,7 @@ export default function StepDetail() {
   const nextStep = steps[currentIndex + 1];
   const hasQc = allQcItems.length > 0;
 
-  const goToStep = (s) => {
-    setPlaying(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-    navigate(`/product/${productId}/stap/${s.id}`);
-  };
-
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (playing) { videoRef.current.pause(); setPlaying(false); }
-    else { videoRef.current.play(); setPlaying(true); }
-  };
-
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    videoRef.current.muted = !muted;
-    setMuted(!muted);
-  };
-
-  const requestFullscreen = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    // iOS Safari
-    if (v.webkitEnterFullscreen) { v.webkitEnterFullscreen(); return; }
-    // Standard
-    if (v.requestFullscreen) v.requestFullscreen();
-    else if (v.webkitRequestFullscreen) v.webkitRequestFullscreen();
-  };
+  const goToStep = (s) => navigate(`/product/${productId}/stap/${s.id}`);
 
   const formatDuration = (sec) => {
     if (!sec) return null;
@@ -198,50 +166,8 @@ export default function StepDetail() {
         )}
 
         {/* Video */}
-        <div className="rounded-2xl overflow-hidden bg-black aspect-video mb-5 relative">
-          {step.video_url ? (
-            <>
-              <video
-                ref={videoRef}
-                src={step.video_url}
-                className="w-full h-full object-contain"
-                playsInline
-                webkit-playsinline="true"
-                x-webkit-airplay="allow"
-                onEnded={() => setPlaying(false)}
-              />
-              {/* Center play button */}
-              {!playing && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button
-                    onClick={togglePlay}
-                    className="w-16 h-16 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all hover:scale-105 active:scale-95"
-                  >
-                    <Play className="w-7 h-7 text-primary ml-1" />
-                  </button>
-                </div>
-              )}
-              {/* Bottom controls */}
-              <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-3 bg-gradient-to-t from-black/70 to-transparent">
-                <button onClick={togglePlay} className="text-white hover:opacity-80 transition-opacity p-1">
-                  {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                </button>
-                <div className="flex items-center gap-3">
-                  <button onClick={toggleMute} className="text-white hover:opacity-80 transition-opacity p-1">
-                    {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </button>
-                  <button onClick={requestFullscreen} className="text-white hover:opacity-80 transition-opacity p-1">
-                    <Maximize className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-white/40 gap-2">
-              <Film className="w-12 h-12" />
-              <span className="text-sm">{language === 'nl' ? 'Geen video beschikbaar' : language === 'fr' ? 'Aucune vidéo disponible' : 'No video available'}</span>
-            </div>
-          )}
+        <div className="mb-5">
+          <VideoPlayer videoUrl={step.video_url} language={language} />
         </div>
 
         {/* Description */}
