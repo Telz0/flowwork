@@ -5,9 +5,19 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Pencil, Trash2, X, Check, Loader2, Upload, Copy } from 'lucide-react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const quillModules = {
+  toolbar: [
+    ['bold', 'italic', 'underline'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['clean'],
+  ],
+};
+const quillFormats = ['bold', 'italic', 'underline', 'list', 'bullet'];
 
 export default function ProductenBeheer({ isAdmin }) {
   const { language } = useLanguage();
@@ -172,7 +182,7 @@ export default function ProductenBeheer({ isAdmin }) {
           </div>
           <div>
             <Label className="text-xs mb-1 block">{language === 'nl' ? 'Omschrijving' : language === 'fr' ? 'Description' : 'Description'}</Label>
-            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder={language === 'nl' ? 'Korte omschrijving...' : language === 'fr' ? 'Courte description...' : 'Short description...'} />
+            <ReactQuill value={form.description} onChange={val => setForm(f => ({ ...f, description: val }))} modules={quillModules} formats={quillFormats} theme="snow" />
           </div>
           <div>
             <Label className="text-xs mb-1 block">{language === 'nl' ? 'Index' : language === 'fr' ? 'Indice' : 'Index'}</Label>

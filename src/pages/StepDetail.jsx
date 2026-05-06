@@ -161,7 +161,7 @@ export default function StepDetail() {
         {getTranslated(step, 'tips', language) && (
           <div className="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mb-5">
             <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-amber-800 leading-relaxed">{getTranslated(step, 'tips', language)}</p>
+            <div className="text-sm text-amber-800 leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: getTranslated(step, 'tips', language) }} />
           </div>
         )}
 
@@ -172,9 +172,7 @@ export default function StepDetail() {
 
         {/* Description */}
         {getTranslated(step, 'description', language) && (
-          <div className="mb-4">
-            <p className="text-foreground leading-relaxed">{getTranslated(step, 'description', language)}</p>
-          </div>
+          <div className="mb-4 prose prose-sm max-w-none text-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: getTranslated(step, 'description', language) }} />
         )}
 
         {/* QC Foto's */}

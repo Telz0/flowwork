@@ -183,7 +183,7 @@ export default function KijkModus() {
                 {getTranslated(step, 'tips', language) && (
                   <div className="flex gap-3 p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl">
                     <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-amber-800 leading-relaxed font-medium">{getTranslated(step, 'tips', language)}</p>
+                    <div className="text-sm text-amber-800 leading-relaxed font-medium prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: getTranslated(step, 'tips', language) }} />
                   </div>
                 )}
 
@@ -194,7 +194,7 @@ export default function KijkModus() {
 
                 {/* Description */}
                 {getTranslated(step, 'description', language) && (
-                  <p className="text-base text-foreground leading-relaxed">{getTranslated(step, 'description', language)}</p>
+                  <div className="text-base text-foreground leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: getTranslated(step, 'description', language) }} />
                 )}
 
                 {/* QC foto's van deze stap */}
