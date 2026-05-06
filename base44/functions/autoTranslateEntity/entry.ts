@@ -121,6 +121,7 @@ IMPORTANT:
 - Only provide translations for the languages listed after "translate to:" for each field
 - Keep technical terms consistent
 - Maintain tone and context
+- If the source text contains HTML tags (like <p>, <ul>, <li>, <strong>, <em>, <br>, etc.), you MUST preserve the exact same HTML structure in the translation. Only translate the text content inside the tags, never remove or alter the HTML tags themselves.
 - Return ONLY valid JSON, no markdown or explanation`;
 
         const llmResponse = await base44.integrations.Core.InvokeLLM({
