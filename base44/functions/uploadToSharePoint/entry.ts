@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
       if (!simpleData.webUrl) {
         return Response.json({ error: 'Kleine upload mislukt', detail: simpleData }, { status: 500 });
       }
-      return Response.json({ file_url: simpleData.webUrl, file_name: fileName });
+      return Response.json({ file_url: simpleData['@microsoft.graph.downloadUrl'] || simpleData.webUrl, file_name: fileName });
     }
 
     // Upload sessie aanmaken
@@ -137,7 +137,8 @@ Deno.serve(async (req) => {
 
       if (uploadRes.status === 200 || uploadRes.status === 201) {
         const data = await uploadRes.json();
-        finalUrl = data.webUrl;
+        // Gebruik @microsoft.graph.downloadUrl voor directe video streaming (werkt op mobiel)
+        finalUrl = data['@microsoft.graph.downloadUrl'] || data.webUrl;
       } else if (uploadRes.status === 202) {
         // Chunk geaccepteerd, ga door
       } else {
